@@ -1,4 +1,6 @@
 const User = require('../Model/User');
+const path = require('path');
+const mkdirp = require('mkdirp');
 
 module.exports = {
     async signUp(req, res) {
@@ -10,13 +12,14 @@ module.exports = {
         }
 
         try {
-            const user = await User.create(req.body);
-            if (user) {
-                const token = await user.generateAuthToken();
-                return res.status(201).send({ user, token });
-            } else {
-                return res.status(400).send({ error: 'This email is already in use !' });
-            }
+            const user = User.create(req.body, async (err, data) => {
+                if(err){
+                    return res.status(400).send({error: 'Unable to create user'});
+                }
+                await mkdirp(path.join(__dirname, "..", "data", `${data.username}`, "pools"));
+                const token = await data.generateAuthToken();
+                return res.status(201).send({ data, token });
+            });
         } catch (error) {
             console.log(error);
             return res.status(500).send({ error: error.message });

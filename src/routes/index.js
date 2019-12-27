@@ -1,10 +1,11 @@
 const express = require('express');
 const router = new express.Router();
 const auth = require('../Middleware/auth');
-const admin = require('../Middleware/admin');
+const admin = require('../Middleware/admin');   
 const FighterController = require('../Controller/FighterController');
 const UserController = require('../Controller/UserController');
 const RNGController = require('../Controller/RNGController');
+const PoolController = require('../Controller/PoolController');
 
 //User End-Points
 router.post('/createUser', UserController.signUp);
@@ -21,5 +22,11 @@ router.get('/fighters?type=:type', auth, FighterController.filterByType);
 
 //Gacha End-Points
 router.get('/randomFighter', RNGController.single);
+router.get('/multiFighters', RNGController.multi);
+
+//Pool End-Points
+router.post('/createPool', auth, PoolController.createPool);
+router.post('/redefinePool/:id', auth, PoolController.redefinePool);
+router.get('/pool/:id', PoolController.getPool);
 
 module.exports = router;
