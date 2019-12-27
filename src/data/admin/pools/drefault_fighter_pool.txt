@@ -1,1 +1,0 @@
-{"name":"drefault Fighter Pool","bannerId":null}
