@@ -1,5 +1,6 @@
 const Srand = require('jsrand');
-const Summon = require('../Controller/UserController');
+const Banner = require('../Model/Banner');
+const Pool = require('../Model/Pool');
 const Fighter = require('../Model/Fighter');
 const fs = require('fs');
 const path = require('path');
@@ -48,13 +49,13 @@ async function readFile(path, encoding) {
  * @param {String} path 
  * @param {String} content 
  */
-async function writeFile(path, content){
+async function writeFile(path, content) {
     return new Promise((resolve, reject) => {
         fs.writeFile(path, content, (err) => {
-            if(err){
+            if (err) {
                 reject(err);
             }
-            resolve({writed: true});
+            resolve({ writed: true });
         })
     })
 }
@@ -65,7 +66,7 @@ async function writeFile(path, content){
  * 
  * @param {String} type 
  */
-const randomFighter = async (type) => {
+const randomFighter = async (type, pathname) => {
     const validTypes = ['Gold', 'Bronze', 'Silver'];
     const isValidType = validTypes.includes(type);
     if (!isValidType) {
@@ -73,35 +74,14 @@ const randomFighter = async (type) => {
     }
 
     const fighterType = type.toLowerCase();
-    const dataPath = path.join(__dirname, '..', 'data', `${fighterType}.txt`);
+    const dataPath = pathname + `${fighterType}.txt`;
     const data = await readFile(dataPath, 'utf8');
+    const fighters = JSON.parse(data);
     if (!data) {
         throw new Error('Inexistent Data');
     }
-    let lines = data.split('\n');
-    const fighterId = lines[Srand.randInt(0, lines.length)];
+    const fighterId = fighters[Srand.randInt(0, fighters.length)];
     const fighter = await Fighter.findById(fighterId);
-
-    return fighter;
-}
-
-/**
- * Retorna um lutador baseado no intervalo de números, definindo a probabilidade
- * fixa para cada tipo existente
- */
-const typedFighter = async () => {
-    let n = Srand.randInt(0, 100);
-    let fighter = null;
-
-    if (isBetween(n, LOWER_BRONZE, UPPER_BRONZE)) {
-        fighter = await randomFighter('Bronze');
-    }
-    if (isBetween(n, LOWER_SILVER, UPPER_SILVER)) {
-        fighter = await randomFighter('Silver');
-    }
-    if (isBetween(n, LOWER_GOLD, UPPER_GOLD)) {
-        fighter = await randomFighter('Gold');
-    }
 
     return fighter;
 }
@@ -110,26 +90,43 @@ const typedFighter = async () => {
  * Define uma pool de lutadores, de modo que seja possível limitar quais lutadores
  * serão extraídos a partir do algorítmo de números aleatórios
  * 
- * @param {String} username 
- * @param {String} poolName 
- * @param {Array} fighters
+ * @param {String} bannerId
  */
-const definePool = (username, poolName, fighters) => {
-    const poolPath = path.join(__dirname, "..", "users", `${username}`, `${poolName}.txt`);
-    console.log(poolPath);
-    
+const bannerSummon = async (bannerId) => {
+    try {
+        const banner = await Banner.findById(bannerId);
+        const pool = await Pool.findById(banner.pool);
+        const poolPath = path.join(__dirname, "..", "data", `${pool.createdBy}`, "pools", `${pool.file}`, "/");
+
+        
+        let n = Srand.randInt(0, 100);
+        let fighter = null;
+        if (isBetween(n, LOWER_BRONZE, UPPER_BRONZE)) {
+            fighter = await randomFighter('Bronze', poolPath);
+        }
+        if (isBetween(n, LOWER_SILVER, UPPER_SILVER)) {
+            fighter = await randomFighter('Silver', poolPath);
+        }
+        if (isBetween(n, LOWER_GOLD, UPPER_GOLD)) {
+            fighter = await randomFighter('Gold', poolPath);
+        }
+
+        return fighter;
+    } catch (error) {
+        console.log(error);
+        throw new Error('Unable to retrieve data');
+    }
 }
 
 module.exports = {
-    typedFighter,
     async single(req, res) {
-        let fighter = await typedFighter();
-        return res.status(200).send({ fighter });
+        const fighter = await bannerSummon(req.params.bannerId);
+        return res.status(200).send({ fighters: [fighter] });
     },
     async multi(req, res) {
         let fighters = [];
         for (let i = 0; i < 10; i++) {
-            let fighter = await typedFighter(req, res);
+            let fighter = await bannerSummon(req.params.bannerId);
             fighters = fighters.concat(fighter);
         }
         return res.status(200).send({ fighters });

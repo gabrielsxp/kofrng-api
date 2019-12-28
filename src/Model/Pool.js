@@ -12,8 +12,7 @@ PoolSchema.pre('validate', function (next) {
     const name = pool.name;
     const nameComponents = name.split(' ');
     nameComponents.forEach((name, index, arr) => arr[index] = name.toLowerCase());
-    let revampedName = nameComponents.join('_');
-    revampedName = `${revampedName}.txt`;
+    const revampedName = nameComponents.join('_');
 
     pool.file = revampedName;
     next();

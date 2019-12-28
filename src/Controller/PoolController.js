@@ -1,4 +1,5 @@
 const Pool = require('../Model/Pool');
+const mkdirp = require('mkdirp');
 const ObjectId = require('mongoose').Types.ObjectId;
 const fs = require('fs');
 const path = require('path');
@@ -31,6 +32,34 @@ async function readFile(path, encoding) {
         });
     });
 }
+
+function reduceFighterObjectToId(fighters) {
+    let f = fighters;
+    f.forEach((fighter, index, arr) => {
+        arr[index] = fighter._id;
+    });
+
+    return f;
+}
+
+const extractFighters = async (pathname, fighters) => {
+    const bronzeFighters = fighters.filter((fighter) => fighter.rarity === 'Bronze');
+    const silverFighters = fighters.filter((fighter) => fighter.rarity === 'Silver');
+    const goldFighters = fighters.filter((fighter) => fighter.rarity === 'Gold');
+
+    try {
+        await mkdirp(pathname);
+        await writeFile(`${pathname}/bronze.txt`, JSON.stringify(reduceFighterObjectToId(bronzeFighters)));
+        await writeFile(`${pathname}/silver.txt`, JSON.stringify(reduceFighterObjectToId(silverFighters)));
+        await writeFile(`${pathname}/gold.txt`, JSON.stringify(reduceFighterObjectToId(goldFighters)));
+
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
 module.exports = {
     async createPool(req, res) {
         const validFields = ['name', 'bannerId'];
@@ -47,8 +76,8 @@ module.exports = {
                     return res.status(400).send({ error: 'Unable to create pool' });
                 }
                 const pathname = path.join(__dirname, "..", "data", `${req.user.username}`, "pools", `${data.file}`);
-                const response = await writeFile(pathname, req.body.fighters);
-                if (response.ok !== true) {
+                const extracted = await extractFighters(pathname, req.body.fighters);
+                if (extracted !== true) {
                     return res.status(400).send({ error: 'Unable to write file' });
                 }
 
@@ -70,8 +99,8 @@ module.exports = {
             const pathname = path.join(__dirname, "..", "data", `${req.user.username}`, "pools", `${fileName}`);
             const fighters = req.body.fighters;
 
-            const response = await writeFile(pathname, fighters);
-            if (response.ok !== true) {
+            const extracted = await extractFighters(pathname, fighters);
+            if (extracted !== true) {
                 return res.status(400).send({ error: 'Unable to re-write file' });
             }
 
@@ -84,13 +113,9 @@ module.exports = {
     async getPool(req, res) {
         try {
             const pool = await Pool.findById(req.params.id);
-            const fileName = pool.file;
-            const pathname = path.join(__dirname, "..", "data", `${pool.createdBy}`, "pools", `${fileName}`);
-
-            const fightersString = await readFile(pathname, 'utf8');
-            return res.status(200).send({ fighters: JSON.parse(fightersString) });
-        } catch(error){
-            return res.status(500).send({error: 'Unable to read file'});
+            return res.status(200).send({ pool });
+        } catch (error) {
+            return res.status(500).send({ error: 'Unable to read file' });
         }
     }
 }
