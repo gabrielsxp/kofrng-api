@@ -10,20 +10,13 @@ module.exports = {
         if (!valid) {
             return res.send(400).send({ error: 'Invalid Fields' });
         }
-
-        try {
-            const user = User.create(req.body, async (err, data) => {
-                if(err){
-                    return res.status(400).send({error: 'Unable to create user'});
-                }
-                await mkdirp(path.join(__dirname, "..", "data", `${data.username}`, "pools"));
-                const token = await data.generateAuthToken();
-                return res.status(201).send({ data, token });
-            });
-        } catch (error) {
-            console.log(error);
-            return res.status(500).send({ error: error.message });
-        }
+        User.create(req.body, async (err, data) => {
+            if(err){
+                return res.status(400).send({error: 'Unable to create user'});
+            }
+            const token = await data.generateAuthToken();
+            return res.status(201).send({ data, token });
+        });
     },
     async signIn(req, res) {
         const validFields = ['username', 'password', 'email'];
