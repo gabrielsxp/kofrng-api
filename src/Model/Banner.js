@@ -6,8 +6,10 @@ const BannerSchema = mongoose.Schema({
     image: { type: String, required: true },
     cost: { type: Number, required: true },
     pool: { type: mongoose.Types.ObjectId, required: true },
-    createdBy: {type: String, required: true}
-});
+    createdBy: {type: String, required: true},
+    start: {type: Date, required: true},
+    end: {type: Date, required: true}
+}, {timeStamps: true});
 
 BannerSchema.pre('save', function(next) {
     const banner = this;

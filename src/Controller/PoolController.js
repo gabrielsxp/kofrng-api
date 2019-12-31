@@ -1,6 +1,5 @@
 const Pool = require('../Model/Pool');
 const mkdirp = require('mkdirp');
-const ObjectId = require('mongoose').Types.ObjectId;
 const fs = require('fs');
 const path = require('path');
 
@@ -87,7 +86,6 @@ module.exports = {
             console.log(error);
             return res.status(500).send({ error: error.errmsg, code: error.code });
         }
-
     },
     async redefinePool(req, res) {
         try {
