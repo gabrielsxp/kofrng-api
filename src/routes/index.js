@@ -10,32 +10,32 @@ const BannerController = require('../Controller/BannerController');
 const DefaultPoolController = require('../Controller/DefaultPoolController');
 
 //User End-Points
-router.post('/createUser', UserController.signUp);
-router.post('/signIn', UserController.signIn);
-router.patch('/updateUser/:id', auth, UserController.update);
-router.delete('/deleteUser/:id', admin, UserController.delete);
+router.post('/signout', UserController.signUp);
+router.post('/signin', UserController.signIn);
+router.patch('/user/:id', auth, UserController.update);
+router.delete('/user/:id', admin, UserController.delete);
 
 //Fighter End-Points
-router.post('/createFighter', admin, FighterController.createFighter);
+router.post('/fighter', admin, FighterController.createFighter);
 router.get('/fighters', FighterController.index);
 router.get('/fighters?year=:year', auth, FighterController.filterByYear);
 router.get('/fighters?color=:color', auth, FighterController.filterByColor);
 router.get('/fighters?type=:type', auth, FighterController.filterByType);
 
 //Gacha End-Points
-router.get('/randomFighter/:bannerId', RNGController.single);
-router.get('/multiFighters/:bannerId', RNGController.multi);
+router.get('/gacha/fighter/:bannerId', RNGController.single);
+router.get('/gacha/fighter/:bannerId', RNGController.multi);
 
 //Pool End-Points
-router.post('/createPool', auth, PoolController.createPool);
-router.post('/redefinePool/:id', auth, PoolController.redefinePool);
+router.post('/pool', auth, PoolController.createPool);
+router.post('/pool/:id', auth, PoolController.redefinePool);
 router.get('/pool/:id', PoolController.getPool);
 
 //Default Pool End-Points
-router.post('/createDefaultPool', admin, DefaultPoolController.createDefaultPool);
-router.get('/getDefaultPool/:id', DefaultPoolController.getDefaultPool);
-router.patch('/updateDefaultPool/:id', admin, DefaultPoolController.updateDefaultPool);
-router.delete('/deleteDefaultPool/:id', admin, DefaultPoolController.deleteDefaultPool);
+router.post('/defaultPool', admin, DefaultPoolController.createDefaultPool);
+router.get('/defaultPool/:id', DefaultPoolController.getDefaultPool);
+router.patch('/defaultPool/:id', admin, DefaultPoolController.updateDefaultPool);
+router.delete('/defaultPool/:id', admin, DefaultPoolController.deleteDefaultPool);
 
 //Banner End-Points
 router.post('/createBanner', auth, BannerController.createBanner);
