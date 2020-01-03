@@ -6,6 +6,7 @@
     "jsonwebtoken": "^8.5.1",
     "jsrand": "^0.2.5",
     "mongoose": "^5.8.3",
+    "react-dnd-multi-backend": "^5.0.0",
     "supertest": "^4.0.2"
   },
   "license": "MIT",
