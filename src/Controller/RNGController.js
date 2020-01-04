@@ -1,6 +1,6 @@
 const Srand = require('jsrand');
 const Banner = require('../Model/Banner');
-const Pool = require('../Model/Pool');
+const DefaultPool = require('../Model/DefaultPool');
 const Fighter = require('../Model/Fighter');
 const fs = require('fs');
 const path = require('path');
@@ -76,14 +76,29 @@ const randomFighter = async (type, pathname) => {
     const fighterType = type.toLowerCase();
     const dataPath = pathname + `${fighterType}.txt`;
     const data = await readFile(dataPath, 'utf8');
-    const fighters = JSON.parse(data);
+
     if (!data) {
         throw new Error('Inexistent Data');
     }
+    const fighters = JSON.parse(data);
     const fighterId = fighters[Srand.randInt(0, fighters.length)];
     const fighter = await Fighter.findById(fighterId);
 
     return fighter;
+}
+
+const getIndex = (m, fesRates) => {
+    for(let i = 0; i < fesRates.length; i++){
+        if (i === 0) {
+            if (isBetween(m, 0, fesRates[i].rate)) {
+                return i;
+            }
+        } else {
+            if (isBetween(m, fesRates[i - 1].rate, fesRates[i].rate)) {
+                return i;
+            }
+        }
+    }
 }
 
 /**
@@ -95,22 +110,41 @@ const randomFighter = async (type, pathname) => {
 const bannerSummon = async (bannerId) => {
     try {
         const banner = await Banner.findById(bannerId);
-        const pool = await Pool.findById(banner.pool);
-        const poolPath = path.join(__dirname, "..", "data", `${pool.createdBy}`, "pools", `${pool.file}`, "/");
+        const pool = await DefaultPool.findById(banner.pool);
+        const poolPath = path.join(__dirname, "..", "data", `${pool.createdBy}`, "pools", `${pool.slug}`, "/");
+        const rates = [...banner.rates];
+        const hasFes = banner.fesRates.length > 0;
+        const hasAS = banner.asRates.length > 0;
 
-        
         let n = Srand.randInt(0, 100);
         let fighter = null;
-        if (isBetween(n, LOWER_BRONZE, UPPER_BRONZE)) {
+        if (isBetween(n, rates[0], rates[1])) {
             fighter = await randomFighter('Bronze', poolPath);
         }
-        if (isBetween(n, LOWER_SILVER, UPPER_SILVER)) {
+        if (isBetween(n, rates[1], rates[2])) {
             fighter = await randomFighter('Silver', poolPath);
         }
-        if (isBetween(n, LOWER_GOLD, UPPER_GOLD)) {
-            fighter = await randomFighter('Gold', poolPath);
+        if (isBetween(n, rates[2], rates[3])) {
+            console.log("GOLD");
+            if (hasFes) {
+                let m = Srand.randFloat(0, rates[3] - rates[2]);
+                console.log("M = " + m);
+                let fesRates = Object.values(banner.fesRates);
+                let fesIndex = getIndex(m, fesRates);
+                
+                console.log('FesIndex:' + fesIndex);
+                if(fesIndex >= 0){
+                    console.log(fesIndex);
+                    console.log(fesRates);
+                    console.log(fesRates[fesIndex]);
+                    fighter = await Fighter.findById(fesRates[fesIndex].fighter);
+                } else {
+                    fighter = await randomFighter('Gold', poolPath);
+                }
+            } else {
+                fighter = await randomFighter('Gold', poolPath);
+            }
         }
-
         return fighter;
     } catch (error) {
         console.log(error);
@@ -121,6 +155,7 @@ const bannerSummon = async (bannerId) => {
 module.exports = {
     async single(req, res) {
         const fighter = await bannerSummon(req.params.bannerId);
+        console.log(fighter.name);
         return res.status(200).send({ fighters: [fighter] });
     },
     async multi(req, res) {

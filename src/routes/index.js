@@ -5,7 +5,6 @@ const admin = require('../Middleware/admin');
 const FighterController = require('../Controller/FighterController');
 const UserController = require('../Controller/UserController');
 const RNGController = require('../Controller/RNGController');
-const PoolController = require('../Controller/PoolController');
 const BannerController = require('../Controller/BannerController');
 const DefaultPoolController = require('../Controller/DefaultPoolController');
 
@@ -26,11 +25,6 @@ router.get('/fighters?type=:type', auth, FighterController.filterByType);
 router.get('/gacha/fighter/:bannerId', RNGController.single);
 router.get('/gacha/fighters/:bannerId', RNGController.multi);
 
-//Pool End-Points
-router.post('/pool', auth, PoolController.createPool);
-router.post('/pool/:id', auth, PoolController.redefinePool);
-router.get('/pool/:id', PoolController.getPool);
-
 //Default Pool End-Points
 router.post('/defaultPool', admin, DefaultPoolController.createDefaultPool);
 router.get('/defaultPool/:id', DefaultPoolController.getDefaultPool);
@@ -39,11 +33,12 @@ router.patch('/defaultPool/:id', admin, DefaultPoolController.updateDefaultPool)
 router.delete('/defaultPool/:id', admin, DefaultPoolController.deleteDefaultPool);
 
 //Banner End-Points
-router.post('/createBanner', auth, BannerController.createBanner);
-router.get('/banners', BannerController.index);
+router.post('/banner', auth, BannerController.createBanner);
+router.get('/all/banners', BannerController.index);
 router.get('/banners/:id', BannerController.getBanner);
+router.get('/banners', auth, BannerController.indexOfUser);
 router.get('/banners/slug/:slug', BannerController.getBySlug);
-router.patch('/updateBanner/:id', auth, BannerController.updateBanner);
-router.delete('/deleteBanner/:id', auth, BannerController.deleteBanner);
+router.patch('/banner/:id', auth, BannerController.updateBanner);
+router.delete('/banner/:id', auth, BannerController.deleteBanner);
 
 module.exports = router;

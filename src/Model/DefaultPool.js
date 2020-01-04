@@ -6,7 +6,8 @@ const DefaultPoolSchema = mongoose.Schema({
         { type: mongoose.Types.ObjectId, ref: 'Fighter' }
     ],
     slug: {type: 'String', index: {unique: true}},
-    createdBy: { type: String, required: true }
+    createdBy: { type: String, required: true },
+    file: { type: String }
 });
 
 module.exports = mongoose.model('DefaultPool', DefaultPoolSchema);
