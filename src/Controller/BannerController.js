@@ -2,7 +2,7 @@ const Banner = require('../Model/Banner');
 
 module.exports = {
     async createBanner(req, res) {
-        const validFields = ['name', 'image', 'cost', 'pool'];
+        const validFields = ['name', 'image', 'singleCost', 'multiCost', 'pool', 'rates', 'fesRates', 'asRates'];
         const fields = Object.keys(req.body);
         const valid = validFields.every((field) => fields.includes(field));
 
@@ -12,8 +12,6 @@ module.exports = {
         try {
             const banner = await Banner.create({
                 ...req.body,
-                start: new Date(req.body.start),
-                end: new Date(req.body.end),
                 createdBy: req.user.username
             });
             if (!banner) {
@@ -21,6 +19,7 @@ module.exports = {
             }
             return res.status(201).send({ banner });
         } catch (error) {
+            console.log(error);
             return res.status(500).send({ error: error.errmsg, code: error.code });
         }
     },
@@ -78,6 +77,21 @@ module.exports = {
             return res.status(200).send({ banner });
         } catch (error) {
             return res.status(500).send({ error: error.errmsg, code: error.code });
+        }
+    },
+    async indexOfUser(req, res) {
+        try {
+            if (!req.user.username) {
+                return res.status(403).send({ error: 'You cannot retrieve data' });
+            }
+            const banners = await Banner.find({ createdBy: req.user.username });
+            if (!banners) {
+                return res.status(400).send({ error: 'Unable to get the banners' });
+            }
+            return res.status(200).send({ banners });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ error: error.errMsg, code: error.code });
         }
     },
     async deleteBanner(req, res) {
