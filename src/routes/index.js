@@ -24,7 +24,7 @@ router.get('/fighters?type=:type', auth, FighterController.filterByType);
 
 //Gacha End-Points
 router.get('/gacha/fighter/:bannerId', RNGController.single);
-router.get('/gacha/fighter/:bannerId', RNGController.multi);
+router.get('/gacha/fighters/:bannerId', RNGController.multi);
 
 //Pool End-Points
 router.post('/pool', auth, PoolController.createPool);
@@ -34,6 +34,7 @@ router.get('/pool/:id', PoolController.getPool);
 //Default Pool End-Points
 router.post('/defaultPool', admin, DefaultPoolController.createDefaultPool);
 router.get('/defaultPool/:id', DefaultPoolController.getDefaultPool);
+router.get('/defaultPool', auth, DefaultPoolController.indexOfUser);
 router.patch('/defaultPool/:id', admin, DefaultPoolController.updateDefaultPool);
 router.delete('/defaultPool/:id', admin, DefaultPoolController.deleteDefaultPool);
 

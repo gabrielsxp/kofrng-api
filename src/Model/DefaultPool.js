@@ -5,6 +5,7 @@ const DefaultPoolSchema = mongoose.Schema({
     fighters: [
         { type: mongoose.Types.ObjectId, ref: 'Fighter' }
     ],
+    slug: {type: 'String', index: {unique: true}},
     createdBy: { type: String, required: true }
 });
 
