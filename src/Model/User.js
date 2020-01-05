@@ -33,12 +33,12 @@ const UserSchema = mongoose.Schema({
 });
 
 /**
- * Método responsável por procurar e retornar um usuário de acordo com
- * o nome de usuário e a senha recebidos como parâmetro.
+ * Método responsavel por procurar e retornar um usuario de acordo com
+ * o nome de usuario e a senha recebidos como parametro.
  */
-UserSchema.statics.findByCredentials = async function (username, password) {
+UserSchema.statics.findByCredentials = async function (email, password) {
     try {
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ email });
         if (!user) {
             throw new Error('This user does not exists');
         }
@@ -54,7 +54,25 @@ UserSchema.statics.findByCredentials = async function (username, password) {
 }
 
 /**
- * Método responsável por receber o objeto original do usuário e 
+ * Metodo responsavel por verificar se um determinado password corresponde
+ * ao password atual de um usuario
+ */
+UserSchema.statics.checkPasswords = async function(id, password){
+    try {
+        const user = await User.findById(id);
+        if(!user){
+            throw new Error('This user does not exists');
+        }
+        const matchPasswords = await bcrypt.compareSync(password, user.password);
+        console.log('matches: ' + matchPasswords);
+        return matchPasswords;
+    } catch(error){
+        return new Error(error);
+    }
+}
+
+/**
+ * Metodo responsavel por receber o objeto original do usuario e 
  * remover os atributos de maior importância a fim de garantir a 
  * segurança e privacidade dos dados ao retornar o objeto para o
  * front-end
@@ -70,9 +88,9 @@ UserSchema.methods.toJSON = function () {
 }
 
 /**
- * Método utilizado para gerar um token de autenticação, de modo que 
- * o usuário possui vários tokens salvos em um array, permitindo a
- * autenticação do mesmo em diversos dispositivos.
+ * Metodo utilizado para gerar um token de autenticacao, de modo que 
+ * o usuario possui varios tokens salvos em um array, permitindo a
+ * autenticacao do mesmo em diversos dispositivos.
  */
 UserSchema.methods.generateAuthToken = async function () {
     const user = this;
@@ -86,8 +104,8 @@ UserSchema.methods.generateAuthToken = async function () {
 }
 
 /**
- * Middleware responsável por verificar se existe alguma alteração na senha
- * do usuário e se houver, utilizar o método RS256 para criptografar a referida
+ * Middleware responsavel por verificar se existe alguma alteracao na senha
+ * do usuario e se houver, utilizar o metodo RS256 para criptografar a referida
  * senha a fim de armazena-la no banco de dados.
  */
 UserSchema.pre('save', async function (next) {

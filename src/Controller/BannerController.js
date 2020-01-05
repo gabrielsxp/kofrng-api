@@ -104,9 +104,43 @@ module.exports = {
                 return res.status(401).send({ error: 'You cannot delete a banner that is not yours' });
             }
             await Banner.findByIdAndDelete(req.params.id);
-            return res.sendStatus(200);
+            return res.status(200).send({success: true});
         } catch (error) {
             return res.status(500).send({ error: errmsg, code: error.code });
+        }
+    },
+    async filterByDate(req, res){
+        try {
+            const dates = req.params.date;
+            var banners = [];
+            var start = new Date(now.getFullYear(),now.getMonth(),now.getDate(),1,0,0);
+            var end = new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,59,59);
+
+            switch(dates){
+                case 0:
+                    banners = await DefaultBanner.find({createdBy: 'admin', created}).
+                break;
+
+                case 1:
+
+                break;
+
+                case 2:
+
+                break;
+
+                case 3:
+
+                break;
+
+                default:
+
+                break;
+            }
+            return res.sendStatus(200);
+        } catch(error){  
+            console.log(error);
+            return res.sendStatus(200);
         }
     }
 }

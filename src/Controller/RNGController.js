@@ -87,18 +87,21 @@ const randomFighter = async (type, pathname) => {
     return fighter;
 }
 
-const getIndex = (m, fesRates) => {
-    for(let i = 0; i < fesRates.length; i++){
+const getIndex = (m, rates) => {
+    for (let i = 0; i < rates.length; i++) {
         if (i === 0) {
-            if (isBetween(m, 0, fesRates[i].rate)) {
+            if (isBetween(m, 0, rates[i].rate)) {
+                console.log("Is between, i = " + i);
                 return i;
             }
         } else {
-            if (isBetween(m, fesRates[i - 1].rate, fesRates[i].rate)) {
+            if (isBetween(m, rates[i - 1].rate, rates[i].rate)) {
+                console.log("Is between, i = " + i);
                 return i;
             }
         }
     }
+    return -1;
 }
 
 /**
@@ -125,19 +128,27 @@ const bannerSummon = async (bannerId) => {
             fighter = await randomFighter('Silver', poolPath);
         }
         if (isBetween(n, rates[2], rates[3])) {
-            console.log("GOLD");
+            var maxRate = rates[3] - rates[2];
+            var m = Srand.randFloat(0, maxRate);
+            console.log("M: " + m);
             if (hasFes) {
-                let m = Srand.randFloat(0, rates[3] - rates[2]);
-                console.log("M = " + m);
                 let fesRates = Object.values(banner.fesRates);
                 let fesIndex = getIndex(m, fesRates);
-                
-                console.log('FesIndex:' + fesIndex);
-                if(fesIndex >= 0){
-                    console.log(fesIndex);
-                    console.log(fesRates);
-                    console.log(fesRates[fesIndex]);
-                    fighter = await Fighter.findById(fesRates[fesIndex].fighter);
+                console.log("Fes Index: " + fesIndex);
+                if (fesIndex >= 0) {
+                    return fighter = await Fighter.findById(fesRates[fesIndex].fighter);
+                } else {
+                    fighter = await randomFighter('Gold', poolPath);
+                }
+            } if (hasAS) {
+                let asRates = Object.values(banner.asRates);
+                asRates[0].rate = asRates[0].rate + 0.3;
+                console.log("Rate: " + asRates[0].rate);
+                let asIndex = getIndex(m, asRates);
+                console.log("AS Index: " + asIndex);
+                if (asIndex >= 0) {
+                    let fighter = await Fighter.findById(asRates[asIndex].fighter);
+                    return fighter;
                 } else {
                     fighter = await randomFighter('Gold', poolPath);
                 }
@@ -154,15 +165,23 @@ const bannerSummon = async (bannerId) => {
 
 module.exports = {
     async single(req, res) {
-        const fighter = await bannerSummon(req.params.bannerId);
-        console.log(fighter.name);
-        return res.status(200).send({ fighters: [fighter] });
+        try {
+            const fighter = await bannerSummon(req.params.bannerId);
+            return res.status(200).send({ fighters: [fighter] });
+        } catch (error) {
+            return res.status(400).send({ error });
+        }
     },
     async multi(req, res) {
         let fighters = [];
-        for (let i = 0; i < 10; i++) {
-            let fighter = await bannerSummon(req.params.bannerId);
-            fighters = fighters.concat(fighter);
+        try {
+            for (let i = 0; i < 10; i++) {
+                let fighter = await bannerSummon(req.params.bannerId);
+                fighters = fighters.concat(fighter);
+            }
+        } catch (error) {
+            console.log(error);
+            return res.status(400).send({ error: 'Unable to use this pool to summon' });
         }
         return res.status(200).send({ fighters });
     }

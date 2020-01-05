@@ -11,8 +11,8 @@ module.exports = {
             return res.send(400).send({ error: 'Invalid Fields' });
         }
         User.create(req.body, async (err, data) => {
-            if(err){
-                return res.status(400).send({error: 'Unable to create user'});
+            if (err) {
+                return res.status(400).send({ error: 'Unable to create user' });
             }
             const token = await data.generateAuthToken();
             return res.status(201).send({ data, token });
@@ -28,7 +28,7 @@ module.exports = {
         }
 
         try {
-            const user = await User.findByCredentials(req.body.username, req.body.password);
+            const user = await User.findByCredentials(req.body.email, req.body.password);
             console.log(user);
             if (!user) {
                 return res.status(400).send('Invalid data');
@@ -41,26 +41,26 @@ module.exports = {
         }
 
     },
-    async update(req, res){
+    async update(req, res) {
         const validFields = ['email', 'password'];
         const fields = Object.keys(req.body);
         const valid = fields.every((field) => validFields.includes(field));
 
-        if(!valid){
-            return res.status(400).send({error: 'Invalid fields'});
+        if (!valid) {
+            return res.status(400).send({ error: 'Invalid fields' });
         }
 
         try {
             const user = await User.findById(req.params.id);
-            if(!user){
-                return res.status(404).send({error: 'User not found'});
+            if (!user) {
+                return res.status(404).send({ error: 'User not found' });
             }
             fields.forEach((update) => user[update] = req.body[update]);
             await user.save();
-            
-            return res.status(200).send({message: 'User updated'});
-        } catch(error){
-            return res.status().send({error});
+
+            return res.status(200).send({ message: 'User updated' });
+        } catch (error) {
+            return res.status().send({ error });
         }
     },
     async delete(req, res) {
@@ -74,6 +74,47 @@ module.exports = {
             return res.status(200).send({ message: 'User deleted successfully' });
         } catch (error) {
             return res.status(500).send({ error });
+        }
+    },
+    async validUsername(req, res) {
+        try {
+            const user = await User.findOne({ username: req.body.username });
+            if (!user) {
+                return res.status(200).send({ valid: true });
+            }
+            return res.status(200).send({ valid: false });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ error: error._message, code: error.code });
+        }
+    },
+    async validUsername(req, res) {
+        try {
+            const user = await User.findOne({ email: req.body.email });
+            if (!user) {
+                return res.status(200).send({ valid: true });
+            }
+            return res.status(200).send({ valid: false });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ error: error._message, code: error.code });
+        }
+    },
+    async changePassword(req, res) {
+        try {
+            const matches = await User.checkPasswords(req.user._id, req.body.password);
+            if(!matches){
+                return res.status(400).send({error: 'Passwords does not matches'});
+            } 
+            req.user.password = req.body.newPassword;
+            const response = await req.user.save();
+            if (!response) {
+                return res.status(400).send({ error: 'Unable to save changes' });
+            }
+            return res.status(200).send({ success: true });
+        } catch (error) {
+            console.log(error.response);
+            return res.status(500).send({ error: error });
         }
     }
 }
