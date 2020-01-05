@@ -32,7 +32,7 @@ const extractFighters = async (pathname, fighters) => {
     const goldFighters = fighters.filter((fighter) => fighter.rarity === 'Gold' && !fighter.isFes && !fighter.isAS);
 
     try {
-        await mkdirp(pathname);
+        mkdirp.sync(pathname);
         await writeFile(`${pathname}/bronze.txt`, JSON.stringify(reduceFighterObjectToId(bronzeFighters)));
         await writeFile(`${pathname}/silver.txt`, JSON.stringify(reduceFighterObjectToId(silverFighters)));
         await writeFile(`${pathname}/gold.txt`, JSON.stringify(reduceFighterObjectToId(goldFighters)));
@@ -109,6 +109,7 @@ module.exports = {
     },
     async updateDefaultPool(req, res) {
         const validFields = ['fighters'];
+        const updates = Object.keys(req.body);
         const valid = updates.every((field) => validFields.includes(field));
 
         if (!valid) {
