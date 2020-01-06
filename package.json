@@ -1,10 +1,12 @@
 {
   "dependencies": {
+    "agenda": "^2.3.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "jsrand": "^0.2.5",
+    "moment": "^2.24.0",
     "mongoose": "^5.8.3",
     "react-dnd-multi-backend": "^5.0.0",
     "rimraf": "^3.0.0",
