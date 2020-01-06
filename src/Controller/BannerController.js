@@ -57,9 +57,9 @@ module.exports = {
         }
     },
     async updateBanner(req, res) {
-        const validUpdateFields = ['image', 'cost', 'pool'];
+        const validFields = ['name', 'image', 'singleCost', 'multiCost', 'pool', 'rates', 'fesRates', 'asRates'];
         const updates = Object.keys(req.body);
-        const valid = updates.every((field) => validUpdateFields.includes(field));
+        const valid = updates.every((field) => validFields.includes(field));
 
         if (!valid) {
             return res.status(400).send({ error: 'Invalid Fields' });
@@ -73,7 +73,8 @@ module.exports = {
             if (!banner) {
                 return res.status(404).send({ error: 'Unable to find the refered banner' });
             }
-            validUpdateFields.forEach((field) => banner[field] = req.body[field]);
+            updates.forEach((field) => banner[field] = req.body[field]);
+            await banner.save();
             return res.status(200).send({ banner });
         } catch (error) {
             return res.status(500).send({ error: error.errmsg, code: error.code });

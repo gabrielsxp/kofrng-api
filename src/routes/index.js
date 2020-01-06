@@ -4,7 +4,8 @@ const auth = require('../Middleware/auth');
 const admin = require('../Middleware/admin');   
 const FighterController = require('../Controller/FighterController');
 const UserController = require('../Controller/UserController');
-const RNGController = require('../Controller/RNGController');
+const SummonController = require('../Controller/SummonController');
+const BestSummonController = require('../Controller/BestSummonController');
 const BannerController = require('../Controller/BannerController');
 const DefaultPoolController = require('../Controller/DefaultPoolController');
 
@@ -25,8 +26,10 @@ router.get('/fighters?color=:color', auth, FighterController.filterByColor);
 router.get('/fighters?type=:type', auth, FighterController.filterByType);
 
 //Gacha End-Points
-router.get('/gacha/fighter/:bannerId', RNGController.single);
-router.get('/gacha/fighters/:bannerId', RNGController.multi);
+router.get('/gacha/fighter/:bannerId', SummonController.makeSingleSummon);
+router.get('/gacha/fighter/:bannerId', SummonController.makeSingleSummon);
+router.get('/gacha/signed/fighter/:bannerId', auth, SummonController.makeSingleSummon);
+router.get('/gacha/signed/fighters/:bannerId', auth, SummonController.makeMultiSummon);
 
 //Default Pool End-Points
 router.post('/defaultPool', auth, DefaultPoolController.createDefaultPool);
@@ -34,6 +37,9 @@ router.get('/defaultPool', auth, DefaultPoolController.indexOfUser);
 router.patch('/defaultPool/:id', auth, DefaultPoolController.updateDefaultPool);
 router.delete('/defaultPool/:id', auth, DefaultPoolController.deleteDefaultPool);
 router.get('/defaultPool/:id', DefaultPoolController.getDefaultPool);
+
+//Summon End-Points
+router.get('/luckiest/summon', BestSummonController.getBestSummon);
 
 //Banner End-Points
 router.post('/banner', auth, BannerController.createBanner);

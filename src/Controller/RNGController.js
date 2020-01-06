@@ -5,16 +5,9 @@ const Fighter = require('../Model/Fighter');
 const fs = require('fs');
 const path = require('path');
 
-const LOWER_BRONZE = 0;
-const UPPER_BRONZE = 19;
-const LOWER_SILVER = 20;
-const UPPER_SILVER = 93;
-const LOWER_GOLD = 94;
-const UPPER_GOLD = 99;
-
 /**
- * Função responsável por verificar se um determinado número recebido como
- * parâmetro está entre dois números definidos
+ * Função responsavel por verificar se um determinado número recebido como
+ * parametro esta entre dois numero definidos
  * 
  * @param {Number} n 
  * @param {Number} lower 
@@ -25,8 +18,8 @@ function isBetween(n, lower, upper) {
 }
 
 /**
- * Função responsável por construir uma Promise para o uso de async/await
- * junto à função fs.readFile()
+ * Função responsavel por construir uma Promise para o uso de async/await
+ * junto a funcao fs.readFile()
  * 
  * @param {String} path 
  * @param {String} encoding 
@@ -43,8 +36,8 @@ async function readFile(path, encoding) {
 }
 
 /**
- * Função responsável por construir uma Promise para o uso de async/await
- * junto à função fs.writeFile()
+ * Função responsavel por construir uma Promise para o uso de async/await
+ * junto a funcao fs.writeFile()
  * 
  * @param {String} path 
  * @param {String} content 
@@ -61,7 +54,7 @@ async function writeFile(path, content) {
 }
 
 /**
- * Retorna um lutador aleatório de um determinado tipo
+ * Retorna um lutador aleatorio de um determinado tipo
  * Obs: Inclui todos os lutadores existentes
  * 
  * @param {String} type 
@@ -87,16 +80,21 @@ const randomFighter = async (type, pathname) => {
     return fighter;
 }
 
+/**
+ * Encontra um index dentro do array de intervalos de probabilidades de 
+ * invocar lutadores de um determinado tipo
+ * 
+ * @param {Number} m 
+ * @param {Array} rates 
+ */
 const getIndex = (m, rates) => {
     for (let i = 0; i < rates.length; i++) {
         if (i === 0) {
             if (isBetween(m, 0, rates[i].rate)) {
-                console.log("Is between, i = " + i);
                 return i;
             }
         } else {
             if (isBetween(m, rates[i - 1].rate, rates[i].rate)) {
-                console.log("Is between, i = " + i);
                 return i;
             }
         }
@@ -130,11 +128,9 @@ const bannerSummon = async (bannerId) => {
         if (isBetween(n, rates[2], rates[3])) {
             var maxRate = rates[3] - rates[2];
             var m = Srand.randFloat(0, maxRate);
-            console.log("M: " + m);
             if (hasFes) {
                 let fesRates = Object.values(banner.fesRates);
                 let fesIndex = getIndex(m, fesRates);
-                console.log("Fes Index: " + fesIndex);
                 if (fesIndex >= 0) {
                     return fighter = await Fighter.findById(fesRates[fesIndex].fighter);
                 } else {
@@ -143,9 +139,7 @@ const bannerSummon = async (bannerId) => {
             } if (hasAS) {
                 let asRates = Object.values(banner.asRates);
                 asRates[0].rate = asRates[0].rate + 0.3;
-                console.log("Rate: " + asRates[0].rate);
                 let asIndex = getIndex(m, asRates);
-                console.log("AS Index: " + asIndex);
                 if (asIndex >= 0) {
                     let fighter = await Fighter.findById(asRates[asIndex].fighter);
                     return fighter;
@@ -158,31 +152,29 @@ const bannerSummon = async (bannerId) => {
         }
         return fighter;
     } catch (error) {
-        console.log(error);
         throw new Error('Unable to retrieve data');
     }
 }
 
 module.exports = {
-    async single(req, res) {
+    async single(bannerId) {
         try {
-            const fighter = await bannerSummon(req.params.bannerId);
-            return res.status(200).send({ fighters: [fighter] });
+            const fighter = await bannerSummon(bannerId);
+            return [fighter];
         } catch (error) {
-            return res.status(400).send({ error });
+            throw new Error(error);
         }
     },
-    async multi(req, res) {
+    async multi(bannerId) {
         let fighters = [];
         try {
             for (let i = 0; i < 10; i++) {
-                let fighter = await bannerSummon(req.params.bannerId);
+                let fighter = await bannerSummon(bannerId);
                 fighters = fighters.concat(fighter);
             }
+            return fighters;
         } catch (error) {
-            console.log(error);
-            return res.status(400).send({ error: 'Unable to use this pool to summon' });
+            throw new Error(error);
         }
-        return res.status(200).send({ fighters });
     }
 }
