@@ -8,6 +8,7 @@ const SummonController = require('../Controller/SummonController');
 const BestSummonController = require('../Controller/BestSummonController');
 const BannerController = require('../Controller/BannerController');
 const DefaultPoolController = require('../Controller/DefaultPoolController');
+const GlobalStatisticsController = require('../Controller/GlobalStatisticsController');
 
 //User End-Points
 router.post('/signup', UserController.signUp);
@@ -51,5 +52,7 @@ router.patch('/banner/:id', auth, BannerController.updateBanner);
 router.delete('/banner/:id', auth, BannerController.deleteBanner);
 router.get('/banners/:id', BannerController.getBanner);
 router.get('/banners/filter/:date', BannerController.filterByDate);
+
+router.get('/stats/banners', GlobalStatisticsController.banner);
 
 module.exports = router;
