@@ -33,4 +33,4 @@ const GlobalStatisticsSchema = mongoose.Schema({
     totalASLastMonth: Number,
 });
 
-export default = mongoose.model('GlobalStatistics',  GlobalStatisticsSchema);
+module.exports = mongoose.model('GlobalStatistics',  GlobalStatisticsSchema);
