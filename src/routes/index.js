@@ -27,7 +27,7 @@ router.get('/fighters?type=:type', auth, FighterController.filterByType);
 
 //Gacha End-Points
 router.get('/gacha/fighter/:bannerId', SummonController.makeSingleSummon);
-router.get('/gacha/fighter/:bannerId', SummonController.makeSingleSummon);
+router.get('/gacha/fighters/:bannerId', SummonController.makeMultiSummon);
 router.get('/gacha/signed/fighter/:bannerId', auth, SummonController.makeSingleSummon);
 router.get('/gacha/signed/fighters/:bannerId', auth, SummonController.makeMultiSummon);
 
@@ -44,6 +44,7 @@ router.get('/luckiest/summon', BestSummonController.getBestSummon);
 //Banner End-Points
 router.post('/banner', auth, BannerController.createBanner);
 router.get('/all/banners', BannerController.index);
+router.get('/all/admin/banners', BannerController.adminIndex);
 router.get('/banners', auth, BannerController.indexOfUser);
 router.get('/banners/slug/:slug', BannerController.getBySlug);
 router.patch('/banner/:id', auth, BannerController.updateBanner);
