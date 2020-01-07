@@ -31,6 +31,7 @@ const GlobalStatisticsSchema = mongoose.Schema({
     totalASYesterday: Number,
     totalASLastWeek: Number,
     totalASLastMonth: Number,
+    belongsTo: {type: mongoose.Types.ObjectId, ref: 'User'}
 });
 
 module.exports = mongoose.model('GlobalStatistics',  GlobalStatisticsSchema);
