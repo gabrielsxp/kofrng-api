@@ -16,7 +16,9 @@ module.exports = {
             const summons = await BestSummon.find({});
             const {summon} = await summons[0].populate('summon').execPopulate();
             const bestSummon = await summon.populate('fighters').execPopulate();
-            return res.status(200).send({summon: bestSummon});
+            const summonWithUser = await bestSummon.populate('madeBy').execPopulate();
+            const summonWithBanner = await summonWithUser.populate('belongsTo').execPopulate();
+            return res.status(200).send({summon: summonWithBanner});
         } catch(error){
             console.log(error);
             return res.status(500).send({error: 'No pulls were made today'});
