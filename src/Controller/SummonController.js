@@ -49,6 +49,63 @@ async function getAllSummonsFilled() {
     const allSummons = await Summon.find({});
     for (let i in allSummons) {
         await allSummons[i].populate('fighters').execPopulate();
+        await allSummons[i].populate('belongsTo').execPopulate();
+    }
+    return allSummons;
+}
+
+/**
+ * Retorna a quantidade de rubis gasta por um determinadi usuario por dia
+ * durante um total de dias
+ */
+async function getRubiesSpentOnADayBeforeToday(day, user, banner) {
+    let baseDay = moment(new Date()).subtract(day, 'days');
+    let start = moment(new Date()).subtract(day, 'days').startOf('day');
+    let end = moment(new Date()).subtract(day, 'days').endOf('day');
+    let _day = baseDay.date() < 10 ? `0${baseDay.date()}` : baseDay.date();
+    let month = baseDay.month() + 1;
+    month = month < 10 ? `0${month}` : month;
+    var key = `${_day}/${month}`;
+
+    var baseQuery = { createdAt: { $gte: start, $lt: end } };
+    if(user){
+        baseQuery = {...baseQuery, madeBy: user};
+    }
+
+    try {
+        const summons = await Summon.find(
+            banner ? {...baseQuery, belongsTo: banner} : {...baseQuery}
+        );
+        for (let i in summons) {
+            await summons[i].populate('fighters').execPopulate();
+            await summons[i].populate('belongsTo').execPopulate();
+        }
+        let stats = summons.reduce((totalRubiesSpent, summon) => {
+            if (summon.fighters.length === 10) {
+                totalRubiesSpent += summon.belongsTo.multiCost;
+            }
+            if (summon.fighters.length === 1) {
+                totalRubiesSpent += summon.belongsTo.singleCost;
+            }
+            return totalRubiesSpent;
+        }, 0);
+        let obj = {};
+        obj[key] = stats;
+
+        return obj;
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
+/**
+ * Retorna a quantidade de rubis gasta na última semana
+ */
+async function detailedRubiesSpentPerDate(date, user, banner) {
+    let allSummons = [];
+    for (let i = 0; i < date; i++) {
+        let stats = await getRubiesSpentOnADayBeforeToday(i, user, banner);
+        allSummons.push(stats);
     }
     return allSummons;
 }
@@ -62,7 +119,7 @@ async function getAllSummonsOfTodayFilledWithFighters() {
     const start = moment(new Date()).startOf('day');
     const end = moment(new Date()).endOf('day');
 
-    const allSummons = await Summon.find({createdAt: {$gte: start, $lt: end}});
+    const allSummons = await Summon.find({ createdAt: { $gte: start, $lt: end } });
     for (let i in allSummons) {
         await allSummons[i].populate('fighters').execPopulate();
     }
@@ -78,7 +135,7 @@ async function getAllSummonsOfYesterdayFilledWithFighters() {
     const start = moment(new Date()).subtract(1, 'day').startOf('day');
     const end = moment(new Date()).subtract(1, 'day').endOf('day');
 
-    const allSummons = await Summon.find({createdAt: {$gte: start, $lt: end}});
+    const allSummons = await Summon.find({ createdAt: { $gte: start, $lt: end } });
     for (let i in allSummons) {
         await allSummons[i].populate('fighters').execPopulate();
     }
@@ -94,7 +151,7 @@ async function getAllSummonsOfWeekFilledWithFighters() {
     const start = moment(new Date()).subtract(7, 'day').startOf('day');
     const end = moment(new Date()).endOf('day');
 
-    const allSummons = await Summon.find({createdAt: {$gte: start, $lt: end}});
+    const allSummons = await Summon.find({ createdAt: { $gte: start, $lt: end } });
     for (let i in allSummons) {
         await allSummons[i].populate('fighters').execPopulate();
     }
@@ -110,7 +167,7 @@ async function getAllSummonsOfMonthFilledWithFighters() {
     const start = moment(new Date()).subtract(7, 'day').startOf('day');
     const end = moment(new Date()).endOf('day');
 
-    const allSummons = await Summon.find({createdAt: {$gte: start, $lt: end}});
+    const allSummons = await Summon.find({ createdAt: { $gte: start, $lt: end } });
     for (let i in allSummons) {
         await allSummons[i].populate('fighters').execPopulate();
     }
@@ -126,7 +183,7 @@ async function getAllSummonsOf3MonthsFilledWithFighters() {
     const start = moment(new Date()).subtract(7, 'day').startOf('day');
     const end = moment(new Date()).endOf('day');
 
-    const allSummons = await Summon.find({createdAt: {$gte: start, $lt: end}});
+    const allSummons = await Summon.find({ createdAt: { $gte: start, $lt: end } });
     for (let i in allSummons) {
         await allSummons[i].populate('fighters').execPopulate();
     }
@@ -142,7 +199,7 @@ async function getAllSummonsOfTodayFilled() {
     const start = moment(new Date()).startOf('day');
     const end = moment(new Date()).endOf('day');
 
-    const allSummons = await Summon.find({createdAt: {$gte: start, $lt: end}});
+    const allSummons = await Summon.find({ createdAt: { $gte: start, $lt: end } });
     for (let i in allSummons) {
         await allSummons[i].populate('fighters').execPopulate();
         await allSummons[i].populate('belongsTo').execPopulate();
@@ -160,7 +217,7 @@ async function getAllSummonsOfYesterdayFilled() {
     const start = moment(yesterday).startOf('day');
     const end = moment(yesterday).endOf('day');
 
-    const allSummons = await Summon.find({createdAt: {$gte: start, $lt: end}});
+    const allSummons = await Summon.find({ createdAt: { $gte: start, $lt: end } });
     for (let i in allSummons) {
         await allSummons[i].populate('fighters').execPopulate();
         await allSummons[i].populate('belongsTo').execPopulate();
@@ -179,7 +236,7 @@ async function getAllSummonsOfWeekFilled() {
     const start = week.startOf('day');
     const end = moment(new Date()).endOf('day');
 
-    const allSummons = await Summon.find({createdAt: {$gte: start, $lt: end}});
+    const allSummons = await Summon.find({ createdAt: { $gte: start, $lt: end } });
     for (let i in allSummons) {
         await allSummons[i].populate('fighters').execPopulate();
         await allSummons[i].populate('belongsTo').execPopulate();
@@ -198,7 +255,7 @@ async function getAllSummonsOfMonthFilled() {
     const start = month.startOf('day');
     const end = moment(new Date()).endOf('day');
 
-    const allSummons = await Summon.find({createdAt: {$gte: start, $lt: end}});
+    const allSummons = await Summon.find({ createdAt: { $gte: start, $lt: end } });
     for (let i in allSummons) {
         await allSummons[i].populate('fighters').execPopulate();
         await allSummons[i].populate('belongsTo').execPopulate();
@@ -267,7 +324,7 @@ module.exports = {
     },
     async totalRubies() {
         try {
-            let allSummons = await  getAllSummonsFilled();
+            let allSummons = await getAllSummonsFilled();
             let rubies = allSummons.reduce((total, summon) => {
                 if (summon.fighters.length === 10) {
                     total += summon.belongsTo.multiCost;
@@ -313,7 +370,7 @@ module.exports = {
             throw new Error(error);
         }
     },
-    async totalRubiesWeek(){
+    async totalRubiesWeek() {
         try {
             let allSummons = await getAllSummonsOfWeekFilled();
             let rubies = allSummons.reduce((total, summon) => {
@@ -329,7 +386,7 @@ module.exports = {
             throw new Error(error);
         }
     },
-    async totalRubiesMonth(){
+    async totalRubiesMonth() {
         try {
             let allSummons = await getAllSummonsOfMonthFilled();
             let rubies = allSummons.reduce((total, summon) => {
@@ -345,13 +402,13 @@ module.exports = {
             throw new Error(error);
         }
     },
-    async totalFightersOfTypeOfToday(type){
+    async totalFightersOfTypeOfToday(type) {
         //type deve ser Bronze, Silver ou Gold
         try {
             const allSummons = await getAllSummonsOfTodayFilledWithFighters();
             let bronzeCount = allSummons.reduce((total, summon) => {
                 total += summon.fighters.reduce((t, s) => {
-                    if(s.rarity === type){
+                    if (s.rarity === type) {
                         t++;
                     }
                     return t;
@@ -359,17 +416,17 @@ module.exports = {
                 return total;
             }, 0);
             return bronzeCount;
-        } catch(error){
+        } catch (error) {
             throw new Error(error);
         }
     },
-    async totalFightersOfTypeOfYesterday(type){
+    async totalFightersOfTypeOfYesterday(type) {
         //type deve ser Bronze, Silver ou Gold
         try {
             const allSummons = await getAllSummonsOfYesterdayFilledWithFighters();
             let bronzeCount = allSummons.reduce((total, summon) => {
                 total += summon.fighters.reduce((t, s) => {
-                    if(s.rarity === type){
+                    if (s.rarity === type) {
                         t++;
                     }
                     return t;
@@ -377,17 +434,17 @@ module.exports = {
                 return total;
             }, 0);
             return bronzeCount;
-        } catch(error){
+        } catch (error) {
             throw new Error(error);
         }
     },
-    async totalFightersOfTypeOfWeek(type){
+    async totalFightersOfTypeOfWeek(type) {
         //type deve ser Bronze, Silver ou Gold
         try {
             const allSummons = await getAllSummonsOfWeekFilledWithFighters();
             let bronzeCount = allSummons.reduce((total, summon) => {
                 total += summon.fighters.reduce((t, s) => {
-                    if(s.rarity === type){
+                    if (s.rarity === type) {
                         t++;
                     }
                     return t;
@@ -395,17 +452,17 @@ module.exports = {
                 return total;
             }, 0);
             return bronzeCount;
-        } catch(error){
+        } catch (error) {
             throw new Error(error);
         }
     },
-    async totalFightersOfTypeOfMonth(type){
+    async totalFightersOfTypeOfMonth(type) {
         //type deve ser Bronze, Silver ou Gold
         try {
             const allSummons = await getAllSummonsOfMonthFilledWithFighters();
             let bronzeCount = allSummons.reduce((total, summon) => {
                 total += summon.fighters.reduce((t, s) => {
-                    if(s.rarity === type){
+                    if (s.rarity === type) {
                         t++;
                     }
                     return t;
@@ -413,17 +470,17 @@ module.exports = {
                 return total;
             }, 0);
             return bronzeCount;
-        } catch(error){
+        } catch (error) {
             throw new Error(error);
         }
     },
-    async totalFightersOfTypeOf3Months(type){
+    async totalFightersOfTypeOf3Months(type) {
         //type deve ser Bronze, Silver ou Gold
         try {
             const allSummons = await getAllSummonsOf3MonthsFilledWithFighters();
             let bronzeCount = allSummons.reduce((total, summon) => {
                 total += summon.fighters.reduce((t, s) => {
-                    if(s.rarity === type){
+                    if (s.rarity === type) {
                         t++;
                     }
                     return t;
@@ -431,23 +488,23 @@ module.exports = {
                 return total;
             }, 0);
             return bronzeCount;
-        } catch(error){
+        } catch (error) {
             throw new Error(error);
         }
     },
-    async totalSpecialFightersOfToday(type){
+    async totalSpecialFightersOfToday(type) {
         //type deve ser fes ou as
         try {
             const allSummons = await getAllSummonsOfTodayFilledWithFighters();
             let bronzeCount = allSummons.reduce((total, summon) => {
                 total += summon.fighters.reduce((t, s) => {
-                    if(type === 'fes'){
-                        if(s.isFes){
+                    if (type === 'fes') {
+                        if (s.isFes) {
                             t++;
                         }
                     }
-                    if(type === 'as'){
-                        if(s.isAS){
+                    if (type === 'as') {
+                        if (s.isAS) {
                             t++;
                         }
                     }
@@ -456,23 +513,23 @@ module.exports = {
                 return total;
             }, 0);
             return bronzeCount;
-        } catch(error){
+        } catch (error) {
             throw new Error(error);
         }
     },
-    async totalSpecialFightersOfYesterday(type){
+    async totalSpecialFightersOfYesterday(type) {
         //type deve ser fes ou as
         try {
             const allSummons = await getAllSummonsOfYesterdayFilledWithFighters();
             let bronzeCount = allSummons.reduce((total, summon) => {
                 total += summon.fighters.reduce((t, s) => {
-                    if(type === 'fes'){
-                        if(s.isFes){
+                    if (type === 'fes') {
+                        if (s.isFes) {
                             t++;
                         }
                     }
-                    if(type === 'as'){
-                        if(s.isAS){
+                    if (type === 'as') {
+                        if (s.isAS) {
                             t++;
                         }
                     }
@@ -481,23 +538,23 @@ module.exports = {
                 return total;
             }, 0);
             return bronzeCount;
-        } catch(error){
+        } catch (error) {
             throw new Error(error);
         }
     },
-    async totalSpecialFightersOfWeek(type){
+    async totalSpecialFightersOfWeek(type) {
         //type deve ser fes ou as
         try {
             const allSummons = await getAllSummonsOfWeekFilledWithFighters();
             let bronzeCount = allSummons.reduce((total, summon) => {
                 total += summon.fighters.reduce((t, s) => {
-                    if(type === 'fes'){
-                        if(s.isFes){
+                    if (type === 'fes') {
+                        if (s.isFes) {
                             t++;
                         }
                     }
-                    if(type === 'as'){
-                        if(s.isAS){
+                    if (type === 'as') {
+                        if (s.isAS) {
                             t++;
                         }
                     }
@@ -506,23 +563,23 @@ module.exports = {
                 return total;
             }, 0);
             return bronzeCount;
-        } catch(error){
+        } catch (error) {
             throw new Error(error);
         }
     },
-    async totalSpecialFightersOfMonth(type){
+    async totalSpecialFightersOfMonth(type) {
         //type deve ser fes ou as
         try {
             const allSummons = await getAllSummonsOfMonthFilledWithFighters();
             let bronzeCount = allSummons.reduce((total, summon) => {
                 total += summon.fighters.reduce((t, s) => {
-                    if(type === 'fes'){
-                        if(s.isFes){
+                    if (type === 'fes') {
+                        if (s.isFes) {
                             t++;
                         }
                     }
-                    if(type === 'as'){
-                        if(s.isAS){
+                    if (type === 'as') {
+                        if (s.isAS) {
                             t++;
                         }
                     }
@@ -531,23 +588,23 @@ module.exports = {
                 return total;
             }, 0);
             return bronzeCount;
-        } catch(error){
+        } catch (error) {
             throw new Error(error);
         }
     },
-    async totalSpecialFightersOf3Months(type){
+    async totalSpecialFightersOf3Months(type) {
         //type deve ser fes ou as
         try {
             const allSummons = await getAllSummonsOf3MonthsFilledWithFighters();
             let bronzeCount = allSummons.reduce((total, summon) => {
                 total += summon.fighters.reduce((t, s) => {
-                    if(type === 'fes'){
-                        if(s.isFes){
+                    if (type === 'fes') {
+                        if (s.isFes) {
                             t++;
                         }
                     }
-                    if(type === 'as'){
-                        if(s.isAS){
+                    if (type === 'as') {
+                        if (s.isAS) {
                             t++;
                         }
                     }
@@ -556,7 +613,16 @@ module.exports = {
                 return total;
             }, 0);
             return bronzeCount;
-        } catch(error){
+        } catch (error) {
+            throw new Error(error);
+        }
+    },
+    async totalRubiesSpentPerDate(days, id, banner) {
+        try {
+            const rubies = await detailedRubiesSpentPerDate(days, id, banner);
+            return rubies;
+        } catch (error) {
+            console.log(error);
             throw new Error(error);
         }
     }

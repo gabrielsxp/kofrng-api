@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const GlobalStatisticsSchema = mongoose.Schema({
+    name: {type: String, required: true},
     totalRubies: Number,
     totalBronze: Number,
     totalSilver: Number,
@@ -31,7 +32,6 @@ const GlobalStatisticsSchema = mongoose.Schema({
     totalASYesterday: Number,
     totalASLastWeek: Number,
     totalASLastMonth: Number,
-    belongsTo: {type: mongoose.Types.ObjectId, ref: 'User'}
 });
 
 module.exports = mongoose.model('GlobalStatistics',  GlobalStatisticsSchema);
