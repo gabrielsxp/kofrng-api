@@ -53,6 +53,8 @@ router.delete('/banner/:id', auth, BannerController.deleteBanner);
 router.get('/banners/:id', BannerController.getBanner);
 router.get('/banners/filter/:date', BannerController.filterByDate);
 
-router.get('/stats/banners', GlobalStatisticsController.banner);
+//Stats Routes
+router.post('/stats', admin, GlobalStatisticsController.createGlobalStats);
+router.get('/stats/rubies', auth, GlobalStatisticsController.createDetailedRubiesStats);
 
 module.exports = router;
