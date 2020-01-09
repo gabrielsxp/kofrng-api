@@ -2,13 +2,22 @@ const GlobalStatistics = require('../Model/GlobalStatistics');
 const SummonController = require('./SummonController');
 
 module.exports = {
-    async createDetailedRubiesStats(req, res) {
+    async getDetailedRubiesStats(req, res) {
         try {
             let rubiesStats = await SummonController.totalRubiesSpentPerDate(req.query.days, req.user._id, req.query.banner);
             return res.status(200).send({ rubies: rubiesStats });
         } catch (error) {
             console.log(error);
             return res.status(500).send({ error });
+        }
+    },
+    async getDetailedFightersStats(req, res) {
+        try {
+            let fighters = await SummonController.totalFightersCollectedPerDate(req.query.days, req.user_id, req.query.banner);
+            return res.status(200).send({ fighters });
+        } catch(error){
+            console.log(error);
+            return res.status(500).send({error});
         }
     },
     async createGlobalStats(req, res) {

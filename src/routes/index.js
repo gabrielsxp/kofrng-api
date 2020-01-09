@@ -55,6 +55,7 @@ router.get('/banners/filter/:date', BannerController.filterByDate);
 
 //Stats Routes
 router.post('/stats', admin, GlobalStatisticsController.createGlobalStats);
-router.get('/stats/rubies', auth, GlobalStatisticsController.createDetailedRubiesStats);
+router.get('/stats/rubies', auth, GlobalStatisticsController.getDetailedRubiesStats);
+router.get('/stats/fighters', auth, GlobalStatisticsController.getDetailedFightersStats);
 
 module.exports = router;
