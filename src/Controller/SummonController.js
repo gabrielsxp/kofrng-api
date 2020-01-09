@@ -55,7 +55,7 @@ async function getAllSummonsFilled() {
 }
 
 /**
- * Retorna a quantidade de rubis gasta por um determinadi usuario por dia
+ * Retorna a quantidade de rubis gasta por um determinado usuario por dia
  * durante um total de dias
  */
 async function getRubiesSpentOnADayBeforeToday(day, user, banner) {
@@ -68,13 +68,13 @@ async function getRubiesSpentOnADayBeforeToday(day, user, banner) {
     var key = `${_day}/${month}`;
 
     var baseQuery = { createdAt: { $gte: start, $lt: end } };
-    if(user){
-        baseQuery = {...baseQuery, madeBy: user};
+    if (user) {
+        baseQuery = { ...baseQuery, madeBy: user };
     }
 
     try {
         const summons = await Summon.find(
-            banner ? {...baseQuery, belongsTo: banner} : {...baseQuery}
+            banner ? { ...baseQuery, belongsTo: banner } : { ...baseQuery }
         );
         for (let i in summons) {
             await summons[i].populate('fighters').execPopulate();
@@ -89,9 +89,83 @@ async function getRubiesSpentOnADayBeforeToday(day, user, banner) {
             }
             return totalRubiesSpent;
         }, 0);
-        let obj = {};
-        obj[key] = stats;
+        let obj = { date: key, rubies: stats };
 
+        return obj;
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
+
+/**
+ * Retorna a quantidade de rubis gasta por um determinadi usuario por dia
+ * durante um total de dias
+ */
+async function getFightersCollectedOnADay(day, user, banner) {
+    let baseDay = moment(new Date()).subtract(day, 'days');
+    let start = moment(new Date()).subtract(day, 'days').startOf('day');
+    let end = moment(new Date()).subtract(day, 'days').endOf('day');
+    let _day = baseDay.date() < 10 ? `0${baseDay.date()}` : baseDay.date();
+    let month = baseDay.month() + 1;
+    month = month < 10 ? `0${month}` : month;
+    var key = `${_day}/${month}`;
+
+    var baseQuery = { createdAt: { $gte: start, $lt: end } };
+    if (user) {
+        baseQuery = { ...baseQuery, madeBy: user };
+    }
+
+    try {
+        const summons = await Summon.find(
+            banner ? { ...baseQuery, belongsTo: banner } : { ...baseQuery }
+        );
+        if(summons.length === 0){
+            return { date: key, bronze: 0, silver: 0, gold: 0, fes: 0, as: 0 };
+        }
+        for (let i in summons) {
+            await summons[i].populate('fighters').execPopulate();
+        }
+        var obj = {};
+        var bronze = 0;
+        var silver = 0;
+        var gold = 0;
+        var fes = 0;
+        var AS = 0;
+
+        summons.forEach(summon => {
+            bronze += summon.fighters.reduce((total, s) => {
+                if (s.rarity === 'Bronze') {
+                    total++;
+                }
+                return total;
+            }, 0);
+            silver += summon.fighters.reduce((total, s) => {
+                if (s.rarity === 'Silver') {
+                    total++;
+                }
+                return total;
+            }, 0);
+            gold += summon.fighters.reduce((total, s) => {
+                if (s.rarity === 'Gold') {
+                    total++;
+                }
+                return total;
+            }, 0);
+            fes += summon.fighters.reduce((total, s) => {
+                if (s.isFes) {
+                    total++;
+                }
+                return total;
+            }, 0);
+            AS += summon.fighters.reduce((total, s) => {
+                if (s.isAS) {
+                    total++;
+                }
+                return total;
+            }, 0);
+            obj = { date: key, bronze, silver, gold, fes, as: AS };
+        });
         return obj;
     } catch (error) {
         throw new Error(error);
@@ -105,6 +179,18 @@ async function detailedRubiesSpentPerDate(date, user, banner) {
     let allSummons = [];
     for (let i = 0; i < date; i++) {
         let stats = await getRubiesSpentOnADayBeforeToday(i, user, banner);
+        allSummons.push(stats);
+    }
+    return allSummons;
+}
+
+/**
+ * Retorna a quantidade de lutadores coletados na última semana
+ */
+async function detailedFightersCollectedPerDate(date, user, banner) {
+    let allSummons = [];
+    for (let i = 0; i < date; i++) {
+        let stats = await getFightersCollectedOnADay(i, user, banner);
         allSummons.push(stats);
     }
     return allSummons;
@@ -621,6 +707,15 @@ module.exports = {
         try {
             const rubies = await detailedRubiesSpentPerDate(days, id, banner);
             return rubies;
+        } catch (error) {
+            console.log(error);
+            throw new Error(error);
+        }
+    },
+    async totalFightersCollectedPerDate(days, id, banner) {
+        try {
+            const fighters = await detailedFightersCollectedPerDate(days, id, banner);
+            return fighters;
         } catch (error) {
             console.log(error);
             throw new Error(error);
