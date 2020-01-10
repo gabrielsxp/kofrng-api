@@ -1,5 +1,6 @@
 const Summon = require('../Model/Summon');
 const RNGController = require('./RNGController');
+const FighterCollectionController = require('./FighterCollectionController');
 const moment = require('moment');
 
 /**
@@ -367,8 +368,15 @@ module.exports = {
                 fighters
             });
 
+            if(req.user){
+                for(let i = 0; i < fighters.length; i++){
+                    await FighterCollectionController.insertFighter(fighters[i], req.user.fighterCollection);
+                }
+            }
+
             return res.status(200).send({ fighters });
         } catch (error) {
+            console.log(error);
             return res.status(500).send({ error: 'Unable to make a summon' });
         }
     },

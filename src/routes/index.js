@@ -9,6 +9,7 @@ const BestSummonController = require('../Controller/BestSummonController');
 const BannerController = require('../Controller/BannerController');
 const DefaultPoolController = require('../Controller/DefaultPoolController');
 const GlobalStatisticsController = require('../Controller/GlobalStatisticsController');
+const FighterCollectionController = require('../Controller/FighterCollectionController');
 
 //User End-Points
 router.post('/signup', UserController.signUp);
@@ -57,5 +58,9 @@ router.get('/banners/filter/:date', BannerController.filterByDate);
 router.post('/stats', admin, GlobalStatisticsController.createGlobalStats);
 router.get('/stats/rubies', auth, GlobalStatisticsController.getDetailedRubiesStats);
 router.get('/stats/fighters', auth, GlobalStatisticsController.getDetailedFightersStats);
+
+//Fighter Collection End-points
+router.post('/fighterCollection', auth, FighterCollectionController.insertFighter);
+router.get('/fighterCollection/:id', auth, FighterCollectionController.getCollection);
 
 module.exports = router;
