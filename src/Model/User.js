@@ -3,14 +3,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const FighterCollectionController = require('../Controller/FighterCollectionController');
 
 const UserSchema = mongoose.Schema({
     username: {
         type: String,
         required: true,
         unique: true,
-        validate(value){
-            this.username = value.replace(' ','_');
+        validate(value) {
+            this.username = value.replace(' ', '_');
         }
     },
     password: {
@@ -29,7 +30,8 @@ const UserSchema = mongoose.Schema({
     },
     tokens: [{
         token: String
-    }]
+    }],
+    fighterCollection: { type: mongoose.Types.ObjectId }
 });
 
 /**
@@ -57,16 +59,16 @@ UserSchema.statics.findByCredentials = async function (email, password) {
  * Metodo responsavel por verificar se um determinado password corresponde
  * ao password atual de um usuario
  */
-UserSchema.statics.checkPasswords = async function(id, password){
+UserSchema.statics.checkPasswords = async function (id, password) {
     try {
         const user = await User.findById(id);
-        if(!user){
+        if (!user) {
             throw new Error('This user does not exists');
         }
         const matchPasswords = await bcrypt.compareSync(password, user.password);
         console.log('matches: ' + matchPasswords);
         return matchPasswords;
-    } catch(error){
+    } catch (error) {
         return new Error(error);
     }
 }
@@ -95,12 +97,30 @@ UserSchema.methods.toJSON = function () {
 UserSchema.methods.generateAuthToken = async function () {
     const user = this;
     console.log(__dirname);
-    var privateKey = fs.readFileSync(path.join(__dirname, 'private.key'), {encoding: 'utf8'});
+    var privateKey = fs.readFileSync(path.join(__dirname, 'private.key'), { encoding: 'utf8' });
     const token = await jwt.sign({ _id: user._id.toString() }, privateKey);
     user.tokens = user.tokens.concat({ token });
     await user.save();
 
     return token;
+}
+
+/**
+ * Metodo utilizado para gerar uma colecao vazia de personagens e 
+ * associa-la ao usuario em questao
+ */
+UserSchema.methods.createCollection = async function () {
+    const user = this;
+    console.log(user);
+    try {
+        const collection = await FighterCollectionController.createCollection(user._id);
+        user.fighterCollection = collection._id;
+        await user.save();
+
+        return collection;
+    } catch (error) {
+        throw new Error(error);
+    }
 }
 
 /**
@@ -117,6 +137,7 @@ UserSchema.pre('save', async function (next) {
     }
     next();
 });
+
 
 const User = mongoose.model('User', UserSchema);
 

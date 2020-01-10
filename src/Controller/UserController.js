@@ -15,7 +15,13 @@ module.exports = {
                 return res.status(400).send({ error: 'Unable to create user' });
             }
             const token = await data.generateAuthToken();
-            return res.status(201).send({ data, token });
+            const collection = await data.createCollection();
+
+            if (token && collection) {
+                return res.status(201).send({ user: data, token });
+            } else {
+                return res.status(400).send({ error: 'Unable to create user' });
+            }
         });
     },
     async signIn(req, res) {
@@ -103,9 +109,9 @@ module.exports = {
     async changePassword(req, res) {
         try {
             const matches = await User.checkPasswords(req.user._id, req.body.password);
-            if(!matches){
-                return res.status(400).send({error: 'Passwords does not matches'});
-            } 
+            if (!matches) {
+                return res.status(400).send({ error: 'Passwords does not matches' });
+            }
             req.user.password = req.body.newPassword;
             const response = await req.user.save();
             if (!response) {
