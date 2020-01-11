@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 const FighterCollectionController = require('../Controller/FighterCollectionController');
+const FavouritesController = require('../Controller/FavouritesController');
 
 const UserSchema = mongoose.Schema({
     username: {
@@ -21,7 +22,13 @@ const UserSchema = mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        validate: {
+            validator: (value) => {
+                return /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(value)
+            },
+            message: () => 'Invalid email'
+        }
     },
     role: {
         type: Number,
@@ -31,7 +38,8 @@ const UserSchema = mongoose.Schema({
     tokens: [{
         token: String
     }],
-    fighterCollection: { type: mongoose.Types.ObjectId }
+    fighterCollection: { type: mongoose.Types.ObjectId },
+    favourites: { type: mongoose.Types.ObjectId }
 });
 
 /**
@@ -103,6 +111,23 @@ UserSchema.methods.generateAuthToken = async function () {
     await user.save();
 
     return token;
+}
+
+/**
+ * Metodo utilizado para gerar uma colecao vazia de invocacoes favoritas e 
+ * associa-la ao usuario em questao
+ */
+UserSchema.methods.createFavourites = async function(userId){
+    const user = this;
+    try {
+        const favourites = await FavouritesController.createFavourite(userId);
+        user.favourites = favourites._id;
+        await user.save();
+
+        return favourites;
+    } catch(error){
+        throw new Error(error);
+    }
 }
 
 /**

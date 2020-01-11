@@ -40,7 +40,7 @@ module.exports = {
             switch (type) {
                 case 'today':
 
-                    const totalRubiesToday = await SummonController.totalRubies();
+                    const totalRubiesToday = await SummonController.totalRubiesToday();
                     const totalBronzeToday = await SummonController.totalFightersOfTypeOfToday('Bronze');
                     const totalSilverToday = await SummonController.totalFightersOfTypeOfToday('Silver');
                     const totalGoldToday = await SummonController.totalFightersOfTypeOfToday('Gold');

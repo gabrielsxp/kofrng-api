@@ -398,25 +398,6 @@ module.exports = {
             return res.status(500).send({ error: 'Unable to make a summon' });
         }
     },
-    async luckiestSummon() {
-        try {
-            let start = moment(new Date()).startOf('day');
-            let end = moment(new Date()).endOf('day');
-
-            let summons = await Summon.
-                find({ createdAt: { $gte: start, $lt: end } })
-                .sort('-score')
-                .populate('fighters')
-                .populate('belongsTo');
-            summons = summons.filter(f => f.belongsTo.createdBy === 'admin');
-
-            let summon = summons[0];
-
-            return summon;
-        } catch (error) {
-            throw new Error({ error: 'Unable to get the luckiest pull of today' });
-        }
-    },
     async getTopSummons(req, res) {
         try {
             let start = moment(new Date()).startOf('day');
