@@ -23,9 +23,7 @@ router.delete('/user/:id', admin, UserController.delete);
 //Fighter End-Points
 router.post('/fighter', admin, FighterController.createFighter);
 router.get('/fighters', FighterController.index);
-router.get('/fighters?year=:year', auth, FighterController.filterByYear);
-router.get('/fighters?color=:color', auth, FighterController.filterByColor);
-router.get('/fighters?type=:type', auth, FighterController.filterByType);
+router.get('/fighters/filter', auth, FighterController.filter);
 
 //Gacha End-Points
 router.get('/gacha/fighter/:bannerId', SummonController.makeSingleSummon);
@@ -41,10 +39,14 @@ router.delete('/defaultPool/:id', auth, DefaultPoolController.deleteDefaultPool)
 router.get('/defaultPool/:id', DefaultPoolController.getDefaultPool);
 
 //Summon End-Points
+router.get('/summon/:id', SummonController.getSummon);
 router.get('/luckiest/summon', BestSummonController.getBestSummon);
+router.get('/top/summons', SummonController.getTopSummons);
 
 //Banner End-Points
 router.post('/banner', auth, BannerController.createBanner);
+router.get('/banners/fans', BannerController.fanBanners);
+router.post('/banners/fans/filter', BannerController.getByName);
 router.get('/all/banners', BannerController.index);
 router.get('/all/admin/banners', BannerController.adminIndex);
 router.get('/banners', auth, BannerController.indexOfUser);
@@ -58,6 +60,7 @@ router.get('/banners/filter/:date', BannerController.filterByDate);
 router.post('/stats', admin, GlobalStatisticsController.createGlobalStats);
 router.get('/stats/rubies', auth, GlobalStatisticsController.getDetailedRubiesStats);
 router.get('/stats/fighters', auth, GlobalStatisticsController.getDetailedFightersStats);
+router.get('/global/stats', GlobalStatisticsController.getAllStats);
 
 //Fighter Collection End-points
 router.post('/fighterCollection', auth, FighterCollectionController.insertFighter);

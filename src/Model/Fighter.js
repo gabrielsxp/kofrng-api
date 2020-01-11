@@ -12,4 +12,28 @@ const FighterSchema = mongoose.Schema({
     isAS: {type: Boolean, required: true, default: false}
 });
 
+FighterSchema.methods.filterByColor = async function(color){
+    const fighter = this;
+    const fighters = await fighter.find({color});
+    return fighters;
+}
+
+FighterSchema.methods.filterByType = async function(type){
+    const fighter = this;
+    const fighters = await fighter.find({type});
+    return fighters;
+}
+
+FighterSchema.methods.filterByRarity = async function(rarity){
+    const fighter = this;
+    const fighters = await fighter.find({rarity});
+    return fighters;
+}
+
+FighterSchema.methods.filterByYear = async function(year){
+    const fighter = this;
+    const fighters = await fighter.find({year});
+    return fighters;
+}
+
 module.exports = mongoose.model('Fighter', FighterSchema);
