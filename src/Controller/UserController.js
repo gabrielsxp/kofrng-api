@@ -16,8 +16,9 @@ module.exports = {
             }
             const token = await data.generateAuthToken();
             const collection = await data.createCollection();
+            const favourites = await data.createFavourites(data._id);
 
-            if (token && collection) {
+            if (token && collection && favourites) {
                 return res.status(201).send({ user: data, token });
             } else {
                 return res.status(400).send({ error: 'Unable to create user' });
