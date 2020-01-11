@@ -121,7 +121,7 @@ async function getFightersCollectedOnADay(day, user, banner) {
         const summons = await Summon.find(
             banner ? { ...baseQuery, belongsTo: banner } : { ...baseQuery }
         );
-        if(summons.length === 0){
+        if (summons.length === 0) {
             return { date: key, bronze: 0, silver: 0, gold: 0, fes: 0, as: 0 };
         }
         for (let i in summons) {
@@ -352,7 +352,6 @@ async function getAllSummonsOfMonthFilled() {
 }
 
 
-
 module.exports = {
     async makeMultiSummon(req, res) {
         try {
@@ -360,7 +359,7 @@ module.exports = {
             let fighters = await RNGController.multi(bannerId);
             let score = await calculateSummonScore(fighters);
 
-            await Summon.create({
+            const summon = await Summon.create({
                 madeBy: req.user ? req.user._id : null,
                 type: 'multi',
                 belongsTo: bannerId,
@@ -368,13 +367,13 @@ module.exports = {
                 fighters
             });
 
-            if(req.user){
-                for(let i = 0; i < fighters.length; i++){
+            if (req.user) {
+                for (let i = 0; i < fighters.length; i++) {
                     await FighterCollectionController.insertFighter(fighters[i], req.user.fighterCollection);
                 }
             }
 
-            return res.status(200).send({ fighters });
+            return res.status(200).send({ fighters, summon: summon._id });
         } catch (error) {
             console.log(error);
             return res.status(500).send({ error: 'Unable to make a summon' });
@@ -386,7 +385,7 @@ module.exports = {
             let fighters = await RNGController.single(bannerId);
             let score = await calculateSummonScore(fighters);
 
-            await Summon.create({
+            const summon = await Summon.create({
                 madeBy: req.user._id,
                 type: 'single',
                 belongsTo: bannerId,
@@ -394,7 +393,7 @@ module.exports = {
                 fighters
             });
 
-            return res.status(200).send({ fighters });
+            return res.status(200).send({ fighters, summon: summon._id });
         } catch (error) {
             return res.status(500).send({ error: 'Unable to make a summon' });
         }
@@ -405,15 +404,36 @@ module.exports = {
             let end = moment(new Date()).endOf('day');
 
             let summons = await Summon.
-                find({ createdAt: { $gte: start, $lt: end } }).
-                sort('-score').
-                populate('fighters');
+                find({ createdAt: { $gte: start, $lt: end } })
+                .sort('-score')
+                .populate('fighters')
+                .populate('belongsTo');
+            summons = summons.filter(f => f.belongsTo.createdBy === 'admin');
 
             let summon = summons[0];
 
             return summon;
         } catch (error) {
             throw new Error({ error: 'Unable to get the luckiest pull of today' });
+        }
+    },
+    async getTopSummons(req, res) {
+        try {
+            let start = moment(new Date()).startOf('day');
+            let end = moment(new Date()).endOf('day');
+
+            let summons = await Summon.
+                find({ createdAt: { $gte: start, $lt: end } })
+                .sort('-score')
+                .populate('fighters')
+                .populate('belongsTo')
+                .populate('madeBy')
+                .limit(10)
+
+            summons = summons.filter(f => f.belongsTo.createdBy === 'admin').slice(0, req.query.limit);
+            return res.status(200).send({ summons });
+        } catch (error) {
+            return res.status(500).send({ error: 'Unable to get the luckiest pull of today' });
         }
     },
     async totalRubies() {
@@ -727,6 +747,21 @@ module.exports = {
         } catch (error) {
             console.log(error);
             throw new Error(error);
+        }
+    },
+    async getSummon(req, res){
+        try {
+            const summon = await Summon.findById(req.params.id)
+                .populate('fighters')
+                .populate('belongsTo')
+                .populate('madeBy');
+
+            if(!summon){
+                return res.status(404).send({ error: 'Unable to find this summoner' });
+            }
+            return res.status(200).send({summon});
+        } catch(error){
+            return res.status(500).send({ error: 'Unable to find this summoner' });
         }
     }
 }

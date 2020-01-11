@@ -13,17 +13,25 @@ module.exports = {
     },
     async getDetailedFightersStats(req, res) {
         try {
-            let fighters = await SummonController.totalFightersCollectedPerDate(req.query.days, req.user_id, req.query.banner);
+            let fighters = await SummonController.totalFightersCollectedPerDate(req.query.days, req.user._id, req.query.banner);
             return res.status(200).send({ fighters });
-        } catch(error){
+        } catch (error) {
             console.log(error);
-            return res.status(500).send({error});
+            return res.status(500).send({ error });
         }
     },
     async createGlobalStats(req, res) {
         const stats = new GlobalStatistics({ ...req.body });
         await stats.save();
         return res.sendStatus(201);
+    },
+    async getAllStats(req, res) {
+        try {
+            const [stats] = await GlobalStatistics.find({});
+            return res.status(200).send({ stats });
+        } catch (error) {
+            return res.status(200).send({ error: 'Unable to get the stats' });
+        }
     },
     async setGlobalStats(type) {
         try {

@@ -42,54 +42,19 @@ module.exports = {
         }
 
     },
-    async filterByYear(req, res) {
-        const validYears = ['94', '95', '96',
-            '97', '98', '99', '00', '01', '02', '03',
-            'XI', 'XII', 'XIII', 'XIV', 'Halloween', 'AS',
-            'Christmas', 'NewYear', 'Collab', 'Tekken', 'SamuraiShodow',
-            'Gintama', 'Valentine', 'Sakura', 'Epic', 'Pretty', 'Alice',
-            'Swimwear', 'Others'];
-
-        const year = req.query.year;
-        if (!validYears.includes(year)) {
-            return res.send({ error: 'Invalid Year' });
-        }
+    async filter(req, res) {
+        const filters = req.query;
+        const query = {...filters};
         try {
-            let fighters = [];
-            fighters = await Fighter.find({ year });
-            return res.status(200).send({ fighters });
-        } catch (error) {
-            return res.status(500).send({ error: 'Internal Error' });
+            const fighters = await Fighter.find({
+                color: {$in: query.color ? query.color.split(',') : null},
+                rarity: {$in: query.rarity ? query.rarity.split(',') : null},
+                type: {$in: query.type ? query.type.split(',') : null}
+            });
+            return res.status(200).send({fighters});
+        } catch(error){
+            console.log(error);
+            return res.status(500).send({error});
         }
-    },
-    async filterByColor(req, res) {
-        const validFields = ['red', 'blue', 'purple', 'yellow', 'green'];
-        const color = req.query.color;
-        const valid = validFields.includes(color);
-
-        if (!valid) {
-            return res.status(400).send({ error: 'Invalid Color' });
-        }
-        try {
-            const fighters = await Fighter.find({ color });
-            return res.status(200).send({ fighters });
-        } catch (error) {
-            return res.status(500).send({ error: error.errmsg, code: error.code });
-        }
-    },
-    async filterByType(req, res) {
-        const validFields = ['attack', 'defense', 'tech'];
-        const type = req.query.type;
-        const valid = validFields.includes(type);
-
-        if (!valid) {
-            return res.status(400).send({ error: 'Invalid Type' });
-        }
-        try {
-            const fighters = await Fighter.find({ color });
-            return res.status(200).send({ fighters });
-        } catch (error) {
-            return res.status(500).send({ error: error.errmsg, code: error.code });
-        }
-    }
+    }   
 }
