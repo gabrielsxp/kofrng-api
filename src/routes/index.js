@@ -11,6 +11,7 @@ const DefaultPoolController = require('../Controller/DefaultPoolController');
 const GlobalStatisticsController = require('../Controller/GlobalStatisticsController');
 const FighterCollectionController = require('../Controller/FighterCollectionController');
 const FavouritesController = require('../Controller/FavouritesController');
+const TierListController = require('../Controller/TierListController');
 
 //User End-Points
 router.post('/signup', UserController.signUp);
@@ -71,5 +72,10 @@ router.get('/fighterCollection/:id', auth, FighterCollectionController.getCollec
 router.post('/favourites/:summonId', auth, FavouritesController.insertSummon);
 router.delete('/favourites/:summonId', auth, FavouritesController.removeSummon);
 router.get('/favourites', auth, FavouritesController.getFavourites);
+
+//TierList End-Points
+router.post('/tierlist', TierListController.createTierList);
+router.get('/tierlist/:id', TierListController.getTierList);
+router.get('/tierlists', TierListController.getListOfTierLists);
 
 module.exports = router;

@@ -17,7 +17,22 @@ module.exports = {
             summons = summons.filter(f => f.belongsTo.createdBy === 'admin');
 
             let bestSummon = summons[0];
-            await BestSummon.create({ summon: bestSummon._id });
+            if(bestSummon){
+                await BestSummon.create({ summon: bestSummon._id });
+            } else {
+                let start = moment(new Date()).subtract(1, 'days').startOf('day');
+                let end = moment(new Date()).subtract(1, 'days').endOf('day');
+
+                let summons = await Summon.
+                find({ createdAt: { $gte: start, $lt: end } })
+                .sort('-score')
+                .populate('fighters')
+                .populate('belongsTo');
+                summons = summons.filter(f => f.belongsTo.createdBy === 'admin');
+
+                let bestSummon = summons[0];
+                await BestSummon.create({ summon: bestSummon._id });
+            }
         } catch (error) {
             console.log(error);
             throw new Error('Unable to create best summon');
