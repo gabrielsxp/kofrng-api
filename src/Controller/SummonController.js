@@ -409,9 +409,8 @@ module.exports = {
                 .populate('fighters')
                 .populate('belongsTo')
                 .populate('madeBy')
-                .limit(10)
-
-            summons = summons.filter(f => f.belongsTo.createdBy === 'admin').slice(0, req.query.limit);
+                .limit(parseInt(req.query.limit));
+                
             return res.status(200).send({ summons });
         } catch (error) {
             return res.status(500).send({ error: 'Unable to get the luckiest pull of today' });

@@ -17,10 +17,4 @@ const BannerSchema = mongoose.Schema({
     asRates: { type: Array }
 }, { timeStamps: true });
 
-BannerSchema.pre('save', function (next) {
-    const banner = this;
-    banner.slug = banner.name.toLowerCase().trim().replace(' ', '_').replace('-', '_');
-    next();
-});
-
 module.exports = mongoose.model('Banner', BannerSchema);

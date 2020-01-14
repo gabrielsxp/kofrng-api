@@ -95,7 +95,7 @@ module.exports = {
             return res.status(500).send({ error: error._message, code: error.code });
         }
     },
-    async validUsername(req, res) {
+    async validEmail(req, res) {
         try {
             const user = await User.findOne({ email: req.body.email });
             if (!user) {

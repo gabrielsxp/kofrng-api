@@ -3,7 +3,8 @@ const moment = require('moment');
 
 module.exports = {
     async createTierList(req, res) {
-        const validFields = ['lists'];
+        console.log(req.body);
+        const validFields = ['lists', 'belongsTo'];
         const fields = Object.keys(req.body);
         const valid = fields.every(field => validFields.includes(field));
 
@@ -42,8 +43,14 @@ module.exports = {
         try {
             const start = moment(new Date).startOf('day');
             const end = moment(new Date).endOf('day');
-
-            const tierLists = await TierList.find({ createdAt: { $gte: start, $lt: end } }).sort('-createdAt').limit(10);
+            let tierLists = null;
+            console.log(req.query);
+            if(req.query.user){
+                console.log('here');
+                tierLists = await TierList.find({ belongsTo: req.query.user, createdAt: { $gte: start, $lt: end } }).sort('-createdAt'); 
+            } else {
+                tierLists = await TierList.find({ createdAt: { $gte: start, $lt: end } }).sort('-createdAt').limit(10);
+            }
             if (!tierLists) {
                 return res.status(404).send({ error: 'Unable to find these tier lists' });
             }
@@ -61,6 +68,7 @@ module.exports = {
                 let returnObject = {
                     _id: tierLists[i]._id,
                     belongsTo: tierLists[i].belongsTo,
+                    createdAt: tireLists[i].createdAt,
                     fighters
                 };
                 returnLists = returnLists.concat(returnObject);
