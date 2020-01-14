@@ -17,7 +17,7 @@ const TierListController = require('../Controller/TierListController');
 router.post('/signup', UserController.signUp);
 router.post('/signin', UserController.signIn);
 router.post('/check/user', UserController.validUsername);
-router.post('/check/email', UserController.validUsername);
+router.post('/check/email', UserController.validEmail);
 router.patch('/user/password', auth, UserController.changePassword);
 router.patch('/user/:id', auth, UserController.update);
 router.delete('/user/:id', admin, UserController.delete);
@@ -75,7 +75,7 @@ router.get('/favourites', auth, FavouritesController.getFavourites);
 
 //TierList End-Points
 router.post('/tierlist', TierListController.createTierList);
-router.get('/tierlist/:id', TierListController.getTierList);
 router.get('/tierlists', TierListController.getListOfTierLists);
+router.get('/tierlist/:id', TierListController.getTierList);
 
 module.exports = router;

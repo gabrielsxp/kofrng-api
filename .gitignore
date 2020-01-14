@@ -2,3 +2,4 @@ node_modules
 
 /src/Model/private.key
 /src/data
+.env

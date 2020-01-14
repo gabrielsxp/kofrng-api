@@ -4,7 +4,7 @@ const SummonController = require('./SummonController');
 module.exports = {
     async getDetailedRubiesStats(req, res) {
         try {
-            let rubiesStats = await SummonController.totalRubiesSpentPerDate(req.query.days, req.user._id, req.query.banner);
+            let rubiesStats = await SummonController.totalRubiesSpentPerDate(req.query.days, req.query.user, req.query.banner);
             return res.status(200).send({ rubies: rubiesStats });
         } catch (error) {
             console.log(error);

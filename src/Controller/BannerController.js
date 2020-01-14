@@ -13,8 +13,10 @@ module.exports = {
             return res.status(400).send({ error: 'Invalid Fields' });
         }
         try {
+            const bannerSlug = req.body.name.toLowerCase().replace(/\s/g, "_").replace(/-/g, "_") + '_' + req.user.username;
             const banner = await Banner.create({
                 ...req.body,
+                slug: bannerSlug,
                 createdBy: req.user.username
             });
             if (!banner) {
