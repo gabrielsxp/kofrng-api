@@ -33,11 +33,12 @@ module.exports = {
             return res.status(500).send({ error: error.errmsg, code: error.code });
         }
     },
-    async index(req, res) {
+    async index(_, res) {
         try {
-            const fighters = await Fighter.find({});
+            const fighters = await Fighter.find({}).sort('-isFes');
             return res.status(200).send({ fighters });
         } catch (error) {
+            console.log(error);
             return res.status(500).send({ error: 'Unable to retrieve data' });
         }
 
