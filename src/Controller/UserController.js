@@ -36,15 +36,14 @@ module.exports = {
 
         try {
             const user = await User.findByCredentials(req.body.email, req.body.password);
-            console.log(user);
+            console.log('user: ' + user);
             if (!user) {
                 return res.status(400).send('Invalid data');
             }
             const token = await user.generateAuthToken();
             return res.status(200).send({ user, token });
         } catch (error) {
-            console.log(error);
-            return res.status(500).send({ error });
+            return res.status(500).send({ error: error.message});
         }
 
     },
