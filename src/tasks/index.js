@@ -1,6 +1,13 @@
 const Agenda = require('agenda');
 const moment = require('moment');
-const mongoConnectionString = 'mongodb://127.0.0.1:27017/kofrng';
+const dotenv = require('dotenv').config();
+
+let mongoConnectionString = '';
+if(process.env.ENV === 'production'){
+    mongoConnectionString = `mongodb://${process.env.MONGOOSE_DB_USER}:${process.env.MONGOOSE_DB_PASSWORD}@${process.env.MONGOOSE_DB_URL}/kofastools`;
+} else {
+    mongoConnectionString = 'mongodb://127.0.0.1:27017/kofrng';
+}
 const BestSummonController = require('../Controller/BestSummonController');
 const GlobalStatiticsController = require('../Controller/GlobalStatisticsController');
 

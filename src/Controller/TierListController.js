@@ -68,7 +68,7 @@ module.exports = {
                 let returnObject = {
                     _id: tierLists[i]._id,
                     belongsTo: tierLists[i].belongsTo,
-                    createdAt: tireLists[i].createdAt,
+                    createdAt: tierLists[i].createdAt,
                     fighters
                 };
                 returnLists = returnLists.concat(returnObject);
