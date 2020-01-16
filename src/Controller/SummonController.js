@@ -386,7 +386,7 @@ module.exports = {
             let score = await calculateSummonScore(fighters);
 
             const summon = await Summon.create({
-                madeBy: req.user._id,
+                madeBy: req.user ? req.user._id : null,
                 type: 'single',
                 belongsTo: bannerId,
                 score,
