@@ -8,12 +8,12 @@ const BannerSchema = mongoose.Schema({
     image: { type: String, required: true },
     singleCost: { type: Number, required: true },
     multiCost: { type: Number, required: true },
-    pool: { type: mongoose.Types.ObjectId, required: true },
+    pool: { type: mongoose.Types.ObjectId, ref: 'DefaultPool', required: true },
     createdBy: { type: String, required: true },
     start: { type: Date },
     end: { type: Date },
     rates: { type: Array, default: [0, 19, 93, 99] },
-    fesRates: { type: Array },
+    fesRates: {type: Array},
     asRates: { type: Array }
 }, { timeStamps: true });
 

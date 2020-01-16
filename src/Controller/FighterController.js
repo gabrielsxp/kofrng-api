@@ -1,6 +1,5 @@
 const Fighter = require('../Model/Fighter');
-const fs = require('fs');
-const path = require('path');
+const Banner = require('../Model/Banner');
 
 module.exports = {
     async createFighter(req, res) {
@@ -37,6 +36,23 @@ module.exports = {
         } catch (error) {
             console.log(error);
             return res.status(500).send({ error: error.errmsg, code: error.code });
+        }
+    },
+    async getFightersById(req, res){
+        try {
+            const banner = await Banner.findById(req.params.id);
+            if(!banner){
+                return res.status(404).send({error: 'This banner does not exists'});
+            }
+            const idsFes = banner.fesRates.map(rate => rate.fighter);
+            const idsAS = banner.asRates.map(rate => rate.fighter);
+            const fesFighters = await Fighter.find({_id: {$in: idsFes}});
+            const asFighters = await Fighter.find({_id: {$in: idsAS}});
+
+            return res.status(200).send({fighters: {fes: fesFighters, as: asFighters}});
+        } catch(error){
+            console.log(error);
+            return res.status(500).send({error: 'Unable to get this fighters right now'});
         }
     },
     async index(_, res) {

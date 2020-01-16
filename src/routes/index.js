@@ -25,6 +25,7 @@ router.delete('/user/:id', admin, UserController.delete);
 //Fighter End-Points
 router.post('/fighter', admin, FighterController.createFighter);
 router.get('/fighters', FighterController.index);
+router.get('/fighters/banner/:id', FighterController.getFightersById);
 router.get('/fighters/filter', auth, FighterController.filter);
 
 //Gacha End-Points
@@ -56,6 +57,7 @@ router.get('/banners/slug/:slug', BannerController.getBySlug);
 router.patch('/banner/:id', auth, BannerController.updateBanner);
 router.delete('/banner/:id', auth, BannerController.deleteBanner);
 router.get('/banners/:id', BannerController.getBanner);
+router.get('/banners/described/:slug', BannerController.getDescribedBanner);
 router.get('/banners/filter/:date', BannerController.filterByDate);
 
 //Stats Routes
