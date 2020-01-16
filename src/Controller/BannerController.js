@@ -82,8 +82,103 @@ module.exports = {
             return res.status(500).send({ error: error.errmsg, code: error.code });
         }
     },
+    async getDescribedBanner(req, res) {
+        try {
+            const banner = await (await Banner.findOne({ slug: req.params.slug }).populate('pool')).execPopulate({});
+            if (!banner) {
+                return res.status(404).send({ error: 'Unable to find the refered banner' });
+            }
+            var bronzeFighters = null;
+            var silverFighters = null;
+            var goldFighters = null;
+            var fesFighters = null;
+            var asFighters = null;
+
+            //Calcula o numero de cada tipo de lutador da pool que pertence ao banner
+            if (banner.pool) {
+                for(let i in banner.pool.fighters){
+                    await banner.populate(`pool.fighters.${i}`).execPopulate({});
+                }
+                const fighters = banner.pool.fighters;
+                bronzeFighters = fighters.reduce((total, fighter) => {
+                    if (fighter.rarity === 'Bronze') {
+                        total++;
+                    }
+                    return total;
+                }, 0);
+
+                silverFighters = fighters.reduce((total, fighter) => {
+                    if (fighter.rarity === 'Silver') {
+                        total++;
+                    }
+                    return total;
+                }, 0);
+
+                goldFighters = fighters.reduce((total, fighter) => {
+                    if (fighter.rarity === 'Gold' && !fighter.isFes && !fighter.isAS) {
+                        total++;
+                    }
+                    return total;
+                }, 0);
+
+                fesFighters = fighters.reduce((total, fighter) => {
+                    if (fighter.isFes) {
+                        total++;
+                    }
+                    return total;
+                }, 0);
+
+                asFighters = fighters.reduce((total, fighter) => {
+                    if (fighter.isAS) {
+                        total++;
+                    }
+                    return total;
+                }, 0);
+            }
+            //Calcula a probabilidade total dos lutadores especiais
+            let sumFesRates = 0;
+            if(banner.fesRates.length > 0){
+                sumFesRates = banner.fesRates.reduce((total, obj) => {
+                    total += obj.rate;
+                    return total;
+                }, 0);
+            }
+            let sumASRates = 0;
+            if(banner.asRates.length > 0){
+                sumASRates = banner.asRates.reduce((total, obj) => {
+                    total += obj.rate;
+                    return total;
+                }, 0);
+            }
+            //Descreve a probabilidade real de cada lutador de cada tipo
+            const bronzeRates = banner.rates[1] - banner.rates[0];
+            const silverRates = banner.rates[2] - banner.rates[1];
+            const goldRates = banner.rates[3] - banner.rates[2];
+            const realGoldRates = (goldRates - (sumFesRates + sumASRates));
+            const rates = {
+                bronze: bronzeRates > 0 ? (bronzeRates/bronzeFighters) : 0,
+                silver: silverRates > 0 ? (silverRates/silverFighters) : 0,
+                gold: realGoldRates > 0 ? (realGoldRates/goldFighters) : 0,
+            };
+            const numberOfFighters = {
+                bronze: bronzeFighters,
+                silver: silverFighters,
+                gold: goldFighters,
+                fes: fesFighters,
+                as: asFighters
+            };
+            const resp = {
+                banner,
+                rates,
+                numberOfFighters
+            };
+            return res.status(200).send(resp);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ error: error.errmsg, code: error.code });
+        }
+    },
     async fanBanners(req, res) {
-        const start = moment(new Date()).startOf('day');
         try {
             const banners = await Banner.find({ createdBy: { $ne: 'admin' } }).limit(10).sort('-createdAt');
             return res.status(200).send({ banners });
