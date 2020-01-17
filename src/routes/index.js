@@ -12,6 +12,7 @@ const GlobalStatisticsController = require('../Controller/GlobalStatisticsContro
 const FighterCollectionController = require('../Controller/FighterCollectionController');
 const FavouritesController = require('../Controller/FavouritesController');
 const TierListController = require('../Controller/TierListController');
+const EmailController = require('../Controller/EmailController');
 
 //User End-Points
 router.post('/signup', UserController.signUp);
@@ -21,6 +22,7 @@ router.post('/check/email', UserController.validEmail);
 router.patch('/user/password', auth, UserController.changePassword);
 router.patch('/user/:id', auth, UserController.update);
 router.delete('/user/:id', admin, UserController.delete);
+router.post('/recovery', EmailController.sendRecovery);
 
 //Fighter End-Points
 router.post('/fighter', admin, FighterController.createFighter);

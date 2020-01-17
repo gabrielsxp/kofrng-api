@@ -2,6 +2,15 @@ const User = require('../Model/User');
 const path = require('path');
 const mkdirp = require('mkdirp');
 
+function generatePassword(length) {
+    let charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%¨&*()",
+    retVal = "";
+    for (var i = 0, n = charset.length; i < length; ++i) {
+        retVal += charset.charAt(Math.floor(Math.random() * n));
+    }
+    return retVal;
+}
+
 module.exports = {
     async signUp(req, res) {
         const validFields = ['username', 'password', 'email'];
@@ -38,12 +47,12 @@ module.exports = {
             const user = await User.findByCredentials(req.body.email, req.body.password);
             console.log('user: ' + user);
             if (!user) {
-                return res.status(400).send({error: 'Invalid credentials'});
+                return res.status(400).send({ error: 'Invalid credentials' });
             }
             const token = await user.generateAuthToken();
             return res.status(200).send({ user, token });
         } catch (error) {
-            return res.status(500).send({ error: error.message});
+            return res.status(500).send({ error: error.message });
         }
 
     },
@@ -121,6 +130,19 @@ module.exports = {
         } catch (error) {
             console.log(error.response);
             return res.status(500).send({ error: error });
+        }
+    },
+    async generateNewPassword(email) {
+        try {
+            const user = await User.findOne({ email });
+            if (!user) {
+                throw new Error('Unable to find this email');
+            }
+            const password = generatePassword();
+            user.password = password;
+            await user.save();
+
+            return password;
         }
     }
 }
