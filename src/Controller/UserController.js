@@ -143,6 +143,8 @@ module.exports = {
             await user.save();
 
             return password;
+        } catch(error){
+            throw new Error(error);
         }
     }
 }
