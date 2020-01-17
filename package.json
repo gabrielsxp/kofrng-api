@@ -17,7 +17,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon ./src/server.js",
-    "start": "node ./src/server.js",
+    "start": "node noerror.js",
     "test": "jest --detectOpenHandles",
     "test:watch": "jest --watch --detectOpenHandles"
   },
