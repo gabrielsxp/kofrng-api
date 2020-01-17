@@ -1,23 +1,11 @@
 {
   "dependencies": {
-    "agenda": "^2.3.0",
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "jsonwebtoken": "^8.5.1",
-    "jsrand": "^0.2.5",
-    "moment": "^2.24.0",
-    "mongoose": "^5.8.3",
-    "nodemailer": "^6.4.2",
-    "react-dnd-multi-backend": "^5.0.0",
-    "rimraf": "^3.0.0",
-    "supertest": "^4.0.2"
+    
   },
   "license": "MIT",
   "scripts": {
     "dev": "nodemon ./src/server.js",
-    "start": "node ./src/server.js",
+    "start": "node noerror.js",
     "test": "jest --detectOpenHandles",
     "test:watch": "jest --watch --detectOpenHandles"
   },
