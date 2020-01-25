@@ -2,6 +2,8 @@
 
 The King of Fighters All Star é um jogo mobile que eu gosto bastante e jogo desde o lançamento em outro de 2019. Para a obtenção de novos personagens no jogo, o jogador deve obter rubis para realizar a invocação de um ou dez personagens ao mesmo tempo. A ideia deste projeto consiste em simular tais invocações, permitindo também a qualquer usuário registrado a criação customizada de qualquer banner de invocação presente no jogo.
 
+O front-end para essa aplicação está em [The King of Fighters All Star Tools - Front-End](https://github.com/gabrielsxp/kofasrng)
+
 ### Tecnologias Utilizadas
 - Javascript
 - NodeJS
