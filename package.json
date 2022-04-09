@@ -7,7 +7,7 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "jsrand": "^0.2.5",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "mongoose": "^5.8.3",
     "nodemailer": "^6.4.2",
     "react-dnd-multi-backend": "^5.0.0",
